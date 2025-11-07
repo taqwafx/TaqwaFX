@@ -72,7 +72,7 @@ const UserInvestments = () => {
                   Plan Type
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  ROI
+                  Profit
                 </th>
                 <th scope="col" className="px-6 py-3 text-nowrap">
                   Start From
@@ -81,7 +81,7 @@ const UserInvestments = () => {
                   End On
                 </th>
                 <th scope="col" className="px-6 py-3 text-nowrap">
-                  Repayment ON
+                  Comming Payment
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Completed Month
@@ -102,8 +102,8 @@ const UserInvestments = () => {
                   <td className="px-6 py-4 font-medium">{formatRupee(inv?.capital)}</td>
                   <td className="px-6 py-4 font-medium">{inv?.planType}</td>
                   <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
-                  <td className="px-6 py-4 font-medium text-nowrap">{inv?.startFrom?.split("T")[0]}</td>
-                  <td className="px-6 py-4 font-medium text-nowrap">{inv?.endFrom?.split("T")[0]}</td>
+                  <td className="px-6 py-4 font-medium text-nowrap">{inv?.startFrom?.split("T")[0] || '-'}</td>
+                  <td className="px-6 py-4 font-medium text-nowrap">{inv?.endFrom?.split("T")[0] || '-'}</td>
                   <td className="px-6 py-4 font-medium text-nowrap">{inv?.repaymentOn?.split("T")[0] || "-"}</td>
                   <td className="px-6 py-4 font-medium">{inv?.completedMonths}</td>
                   <td className="px-6 py-4 font-medium">

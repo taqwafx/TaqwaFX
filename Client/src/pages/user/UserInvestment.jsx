@@ -46,36 +46,10 @@ const UserInvestment = () => {
                 />
               </svg>
               <Link
-                to={-2}
+                to={-1}
                 className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600"
               >
-                Investores
-              </Link>
-            </div>
-          </li>
-
-          <li>
-            <div className="flex items-center">
-              <svg
-                className="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 6 10"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m1 9 4-4-4-4"
-                />
-              </svg>
-              <Link
-                to={-1}
-                className="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2"
-              >
-                Investor
+                Investments
               </Link>
             </div>
           </li>
@@ -113,7 +87,7 @@ const UserInvestment = () => {
               onClick={() => setShowAlertModel(true)}
               className=" cursor-pointer font-semibold hover:text-blue-700"
             >
-              Bank Ac Details
+              Cash Flow Details
             </span>
           </div>
 
@@ -139,7 +113,7 @@ const UserInvestment = () => {
                   Start from:
                 </h3>
                 <p className="text-slate-600">
-                  {investment?.startFrom?.split("T")[0]}
+                  {investment?.startFrom?.split("T")[0] || "-"}
                 </p>
               </div>
             </div>
@@ -157,7 +131,7 @@ const UserInvestment = () => {
 
               <div>
                 <h3 className="text-md font-semibold text-slate-900 mb-1">
-                  ROI:
+                  Profit:
                 </h3>
                 <p className="text-slate-600">{investment?.roi}%</p>
               </div>
@@ -167,7 +141,7 @@ const UserInvestment = () => {
                   End On:
                 </h3>
                 <p className="text-slate-600">
-                  {investment?.endFrom?.split("T")[0]}
+                  {investment?.endFrom?.split("T")[0] || "-"}
                 </p>
               </div>
             </div>
@@ -184,7 +158,7 @@ const UserInvestment = () => {
             <div className="space-y-8">
               <div>
                 <h3 className="text-md font-semibold text-slate-900 mb-1">
-                  Repayment on:
+                  Comming Payment:
                 </h3>
                 <p className="text-slate-600">
                   {investment?.repaymentOn?.split("T")[0] || "-"}
@@ -295,7 +269,7 @@ const UserInvestment = () => {
                 >
                   <td className="px-6 py-4 font-medium">{month?.monthNo}</td>
                   <td className="px-6 py-4 font-medium text-nowrap">
-                    {month?.returnDate?.split("T")[0]}
+                    {month?.returnDate?.split("T")[0] || "-"}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {formatRupee(month?.capitalReturn)}
@@ -366,19 +340,44 @@ const UserInvestment = () => {
               <span className="sr-only">Close modal</span>
             </button>
             <div className="p-4 md:p-5 text-center">
-              <h3 className=" text-2xl font-bold">Bank Account Details</h3>
-              <h3 className="my-5 text-lg font-normal text-gray-800">
-                Bank Name:{" "}
-                <span className=" font-medium">{investment?.bankName}</span>,
-                Holder Name:{" "}
-                <span className=" font-medium">
-                  {investment?.bankHolderName}
-                </span>
-                , Account Number:{" "}
-                <span className=" font-medium">{investment?.bankAcNumber}</span>{" "}
-                & IFSC Number:{" "}
-                <span className=" font-medium">{investment?.bankIFSCCode}</span>
-              </h3>
+              <h3 className="text-2xl font-bold">Cash Flow Details</h3>
+              <div className="my-3">
+                <h3 className=" w-full text-start text-lg font-medium">
+                  Bank Ac Details:
+                </h3>
+                <h3 className="mt-1 text-md text-start font-normal text-gray-800">
+                  Bank Name:{" "}
+                  <span className="font-medium">{investment?.bankName}</span>,
+                  Holder Name:{" "}
+                  <span className=" font-medium">
+                    {investment?.bankHolderName}
+                  </span>
+                  , Account Number:{" "}
+                  <span className=" font-medium">
+                    {investment?.bankAcNumber}
+                  </span>{" "}
+                  & IFSC Number:{" "}
+                  <span className=" font-medium">
+                    {investment?.bankIFSCCode}
+                  </span>
+                </h3>
+              </div>
+
+              <div className="my-3">
+                <h3 className=" w-full text-start text-lg font-medium">
+                  Deposit Details:
+                </h3>
+                <h3 className="mt-1 text-md text-start font-normal text-gray-800">
+                  Deposit On:{" "}
+                  <span className="font-medium">
+                    {investment?.depositDate?.split("T")[0] || "-"}
+                  </span>
+                  , Depost Type:{" "}
+                  <span className=" font-medium">
+                    {investment?.depositType}
+                  </span>
+                </h3>
+              </div>
               <button
                 onClick={() => setShowAlertModel((prev) => !prev)}
                 type="button"
@@ -394,4 +393,4 @@ const UserInvestment = () => {
   );
 };
 
-export default UserInvestment
+export default UserInvestment;

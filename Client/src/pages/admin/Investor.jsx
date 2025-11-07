@@ -180,7 +180,7 @@ const Investor = () => {
                   Join Date:
                 </h3>
                 <p className="text-slate-600">
-                  {investor?.joinDate?.split("T")[0]}
+                  {investor?.joinDate?.split("T")[0] || '-'}
                 </p>
               </div>
 
@@ -387,7 +387,7 @@ const Investor = () => {
                   Plan Type
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  ROI
+                  Profit
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Start From
@@ -396,7 +396,7 @@ const Investor = () => {
                   End On
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Repayment ON
+                  Comming Repayment
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Completed Month
@@ -424,13 +424,13 @@ const Investor = () => {
                   <td className="px-6 py-4 font-medium">{inv?.planType}</td>
                   <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
                   <td className="px-6 py-4 font-medium">
-                    {inv?.startDate?.split("T")[0]}
+                    {inv?.startDate?.split("T")[0] || '-'}
                   </td>
                   <td className="px-6 py-4 font-medium">
-                    {inv?.endDate?.split("T")[0]}
+                    {inv?.endDate?.split("T")[0] || '-'}
                   </td>
                   <td className="px-6 py-4 font-medium">
-                    {inv?.repaymentDate?.split("T")[0]}
+                    {inv?.repaymentDate?.split("T")[0] || '-'}
                   </td>
                   <td className="px-6 py-4 font-medium">{inv?.completedMonths}</td>
                   <td className="px-6 py-4 font-medium">

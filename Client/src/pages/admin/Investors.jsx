@@ -24,8 +24,7 @@ const Investors = () => {
   });
 
   const { data, isLoading, isFetching, refetch } = useGetInvestors(filters);
-  console.log(plans);
-
+ 
   const handleChange = (e) => {
     setFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -61,12 +60,6 @@ const Investors = () => {
     return () => observer.disconnect();
   }, [data, isFetching, filters]);
 
-  useEffect(()=>{
-    console.log(filters);
-    
-  }, [filters])
-
-  // if (isLoading && filters.page === 1) return <p>Loading...</p>;
 
   return (
     <main>
@@ -183,7 +176,7 @@ const Investors = () => {
             name="roi"
             id="roi"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-            placeholder="ROI%"
+            placeholder="PROFIT%"
             value={filters.roi}
             onChange={handleChange}
           />
@@ -255,7 +248,7 @@ const Investors = () => {
                     </td>
                     <td className="px-6 py-4 font-medium">{investor?.name}</td>
                     <td className="px-6 py-4 font-medium">
-                      {investor?.joinDate?.split("T")[0]}
+                      {investor?.joinDate?.split("T")[0] || '-'}
                     </td>
                     <td className="px-6 py-4 font-medium">
                       {formatRupee(investor?.totalCapital)}

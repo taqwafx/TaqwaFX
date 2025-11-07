@@ -9,22 +9,15 @@ const plans = [
     name: "Silver Plan",
     roi: "5%",
     duration: "12 Months",
-    minimum: "$1,000",
+    minimum: "1,00,000",
     highlighted: false,
   },
   {
     name: "Gold Plan",
-    roi: "10%",
+    roi: "5+5%",
     duration: "20 Months",
-    minimum: "$1,000",
+    minimum: "1,00,000",
     highlighted: true,
-  },
-  {
-    name: "Platinum Plan",
-    roi: "12%",
-    duration: "24 Months",
-    minimum: "$1,000",
-    highlighted: false,
   },
 ];
 
@@ -124,7 +117,7 @@ const LandingPage = () => {
           {/* Left Content */}
           <div className="space-y-6">
             <h2 className="text-4xl font-bold text-gray-900">
-              About RB Invest
+              About TaqwaFX Investment
             </h2>
             <p className="text-lg text-gray-600 leading-relaxed">
               We are committed to providing our clients with the best investment
@@ -174,7 +167,7 @@ const LandingPage = () => {
                     <span className="text-3xl font-bold text-gray-900">
                       {plan.roi}
                     </span>
-                    <span className="text-gray-600 ml-2">Monthly ROI</span>
+                    <span className="text-gray-600 ml-2">Monthly Profit</span>
                   </p>
                 </div>
 
@@ -222,7 +215,7 @@ const LandingPage = () => {
                 <span className="text-blue-600 text-xl">✉</span>
               </div>
               <p className="text-lg text-gray-900 font-medium">
-                info@rbinvest.com
+                taqwafx313@gmail.com
               </p>
             </div>
 
@@ -231,7 +224,7 @@ const LandingPage = () => {
                 <span className="text-blue-600 text-xl">📞</span>
               </div>
               <p className="text-lg text-gray-900 font-medium">
-                +1 234 562.650
+                {"+1 (659)77-0103"}
               </p>
             </div>
           </div>

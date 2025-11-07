@@ -189,7 +189,7 @@ const UserDashboard = () => {
                   Join Date:
                 </h3>
                 <p className="text-slate-600">
-                  {userDashboard?.investorDetails?.joinDate?.split("T")[0]}
+                  {userDashboard?.investorDetails?.joinDate?.split("T")[0] || '-'}
                 </p>
               </div>
 
@@ -222,7 +222,7 @@ const UserDashboard = () => {
 
         <div className=" bg-white flex flex-col rounded-lg p-6 border border-slate-200 shadow w-full max-w-[788px] h-full">
           <h1 className="mb-6 font-bold leading-7 text-xl pb-4 border-b border-[#e5e7eb]">
-            Clear Months
+            Paid Months
           </h1>
 
           <div className="relative w-full h-full overflow-auto">
@@ -239,7 +239,7 @@ const UserDashboard = () => {
                     Return Date
                   </th>
                   <th scope="col" className="px-6 py-3">
-                    Total Return
+                    Total Profit
                   </th>
                   <th scope="col" className="px-6 py-3">
                     Plan Type
@@ -264,7 +264,7 @@ const UserDashboard = () => {
                     <td className="px-6 py-4 font-medium">{inv?.investmentId}</td>
                     <td className="px-6 py-4 font-medium">{inv?.monthNo}</td>
                     <td className="px-6 py-4 font-medium">
-                      {inv?.returnDate?.split("T")[0]}
+                      {inv?.returnDate?.split("T")[0] || '-'}
                     </td>
                     <td className="px-6 py-4 font-medium">
                       {formatRupee(inv?.totalReturn)}
@@ -282,7 +282,7 @@ const UserDashboard = () => {
 
       <div className="bg-white rounded-lg p-6 border border-slate-200 shadow mt-3">
         <h1 className=" mb-6 font-bold leading-7 text-xl pb-4 border-b border-[#e5e7eb]">
-          Comming Payments
+          Comming Soon Payments
         </h1>
 
         <div className="relative overflow-x-auto">
@@ -299,13 +299,13 @@ const UserDashboard = () => {
                   Return Date
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Total Return
+                  Total Profit
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Payment Status
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Payment type cr
+                  Plan Type
                 </th>
               </tr>
             </thead>
@@ -321,7 +321,7 @@ const UserDashboard = () => {
                   <td className="px-6 py-4 font-medium">{inv?.investmentId}</td>
                   <td className="px-6 py-4 font-medium">{inv?.monthNo}</td>
                   <td className="px-6 py-4 font-medium">
-                    {inv?.returnDate?.split("T")[0]}
+                    {inv?.returnDate?.split("T")[0] || '-'}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {formatRupee(inv?.totalReturn)}

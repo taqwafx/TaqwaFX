@@ -61,12 +61,12 @@ const DonutChart = ({ overallStats, planWiseData }) => {
     chartInstance.current = new Chart(ctx, {
       type: "doughnut",
       data: {
-        labels: planWiseData.map((plan) => plan.planName),
+        labels: planWiseData?.map((plan) => plan.planName),
         datasets: [
           {
             label: "Overall Fund",
-            data: planWiseData.map((plan) => plan.totalFund),
-            backgroundColor: chartColors.slice(0, planWiseData.length),
+            data: planWiseData?.map((plan) => plan?.totalFund),
+            backgroundColor: chartColors.slice(0, planWiseData?.length),
             hoverOffset: 7,
           },
         ],

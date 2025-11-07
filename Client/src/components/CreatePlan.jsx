@@ -152,7 +152,7 @@ const CreatePlan = () => {
                       htmlFor="capitalROI"
                       className="startDate mb-2 text-sm font-medium text-gray-900 "
                     >
-                      Capital ROI%
+                      Capital Return%
                     </label>
                     <input
                       type="text"
@@ -170,7 +170,7 @@ const CreatePlan = () => {
                       htmlFor="returnROI"
                       className="block mb-2 text-sm font-medium text-gray-900"
                     >
-                      Return ROI%
+                      Profit Return%
                     </label>
                     <input
                       type="text"

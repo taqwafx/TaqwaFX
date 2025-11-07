@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 import { formatRupee } from "../../utils/helper.js";
 import UpdateRetunMonthForm from "../../components/UpdateRetunMonthForm.jsx";
 
-
 const Investment = () => {
   const [investment, setInvestment] = useState({});
   const [showAlertModel, setShowAlertModel] = useState(false);
@@ -136,7 +135,7 @@ const Investment = () => {
               onClick={() => setShowAlertModel(true)}
               className=" cursor-pointer font-semibold hover:text-blue-700"
             >
-              Bank Ac Details
+              Cash Flow Details
             </span>
           </div>
 
@@ -162,7 +161,7 @@ const Investment = () => {
                   Start from:
                 </h3>
                 <p className="text-slate-600">
-                  {investment?.startFrom?.split("T")[0]}
+                  {investment?.startFrom?.split("T")[0] || "-"}
                 </p>
               </div>
             </div>
@@ -180,7 +179,7 @@ const Investment = () => {
 
               <div>
                 <h3 className="text-md font-semibold text-slate-900 mb-1">
-                  ROI:
+                  Profit:
                 </h3>
                 <p className="text-slate-600">{investment?.roi}%</p>
               </div>
@@ -190,7 +189,7 @@ const Investment = () => {
                   End On:
                 </h3>
                 <p className="text-slate-600">
-                  {investment?.endFrom?.split("T")[0]}
+                  {investment?.endFrom?.split("T")[0] || "-"}
                 </p>
               </div>
             </div>
@@ -207,10 +206,10 @@ const Investment = () => {
             <div className="space-y-8">
               <div>
                 <h3 className="text-md font-semibold text-slate-900 mb-1">
-                  Repayment on:
+                  Comming Repayment:
                 </h3>
                 <p className="text-slate-600">
-                  {investment?.repaymentOn?.split("T")[0]}
+                  {investment?.repaymentOn?.split("T")[0] || "-"}
                 </p>
               </div>
 
@@ -312,7 +311,7 @@ const Investment = () => {
                 >
                   <td className="px-6 py-4 font-medium">{month?.monthNo}</td>
                   <td className="px-6 py-4 font-medium text-nowrap">
-                    {month?.returnDate?.split("T")[0]}
+                    {month?.returnDate?.split("T")[0] || "-"}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {formatRupee(month?.capitalReturn)}
@@ -330,11 +329,11 @@ const Investment = () => {
                     <span
                       onClick={() =>
                         markAsPaid(
-                          month.status,
+                          month?.status,
                           investmentId,
-                          month.monthNo,
-                          month.totalReturn,
-                          month?.returnDate?.split("T")[0]
+                          month?.monthNo,
+                          month?.totalReturn,
+                          month?.returnDate?.split("T")[0] || "-"
                         )
                       }
                       className={`${
@@ -402,19 +401,42 @@ const Investment = () => {
               <span className="sr-only">Close modal</span>
             </button>
             <div className="p-4 md:p-5 text-center">
-              <h3 className=" text-2xl font-bold">Bank Account Details</h3>
-              <h3 className="my-5 text-lg font-normal text-gray-800">
-                Bank Name:{" "}
-                <span className=" font-medium">{investment?.bankName}</span>,
-                Holder Name:{" "}
-                <span className=" font-medium">
-                  {investment?.bankHolderName}
-                </span>
-                , Account Number:{" "}
-                <span className=" font-medium">{investment?.bankAcNumber}</span>{" "}
-                & IFSC Number:{" "}
-                <span className=" font-medium">{investment?.bankIFSCCode}</span>
-              </h3>
+              <h3 className="text-2xl font-bold">Cash Flow Details</h3>
+              <div className="my-3">
+                <h3 className=" w-full text-start text-lg font-medium">
+                  Bank Ac Details:
+                </h3>
+                <h3 className="mt-1 text-md text-start font-normal text-gray-800">
+                  Bank Name:{" "}
+                  <span className="font-medium">{investment?.bankName}</span>,
+                  Holder Name:{" "}
+                  <span className=" font-medium">
+                    {investment?.bankHolderName}
+                  </span>
+                  , Account Number:{" "}
+                  <span className=" font-medium">
+                    {investment?.bankAcNumber}
+                  </span>{" "}
+                  & IFSC Number:{" "}
+                  <span className=" font-medium">
+                    {investment?.bankIFSCCode}
+                  </span>
+                </h3>
+              </div>
+
+              <div className="my-3">
+                <h3 className=" w-full text-start text-lg font-medium">
+                  Deposit Details:
+                </h3>
+                <h3 className="mt-1 text-md text-start font-normal text-gray-800">
+                  Deposit On:{" "}
+                  <span className="font-medium">{investment?.depositDate?.split("T")[0] || "-"}</span>,
+                  Depost Type:{" "}
+                  <span className=" font-medium">
+                    {investment?.depositType}
+                  </span>
+                </h3>
+              </div>
               <button
                 onClick={() => setShowAlertModel((prev) => !prev)}
                 type="button"
@@ -430,4 +452,4 @@ const Investment = () => {
   );
 };
 
-export default Investment
+export default Investment;

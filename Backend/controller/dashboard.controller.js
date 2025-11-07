@@ -89,7 +89,7 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
   // 7️⃣ Upcoming repayments (next 7 days)
   const today = new Date();
   const next7Days = new Date(today);
-  next7Days.setDate(today.getDate() + 60);
+  next7Days.setDate(today.getDate() + 5);
 
   const upcomingRepaymentsRaw = await investmentModel.aggregate([
     { $unwind: "$monthlyReturns" },
@@ -203,7 +203,7 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
   // Dates for upcoming payments filter
   const today = new Date();
   const next5Days = new Date();
-  next5Days.setDate(today.getDate() + 60);
+  next5Days.setDate(today.getDate() + 5);
 
   // If no investments yet
   if (!investments.length) {
@@ -283,7 +283,8 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
     capital: investedByPlan[plan.planName] || 0,
   }));
 
-  clearMonths.sort((a, b) => new Date(b.returnDate) - new Date(a.returnDate));
+  clearMonths.reverse();
+  let firstFiveClearMonths = clearMonths.slice(0, 5);
   comingPayments.sort(
     (a, b) => new Date(a.returnDate) - new Date(b.returnDate)
   );
@@ -307,7 +308,7 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
     totalInvestmentCapital,
     totalPaidTillDate,
     investedByPlan: investedByPlanArray,
-    clearMonths,
+    clearMonths:firstFiveClearMonths,
     comingPayments,
   };
 

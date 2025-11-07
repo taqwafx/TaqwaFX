@@ -15,6 +15,8 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
     returnROI: null,
     startDate: "",
     endDate: "",
+    depositDate: "",
+    depositType: "",
     totalMonths: null,
     bankName: "",
     bankHolderName: "",
@@ -53,13 +55,25 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
   const handleBlur = () => {
     if (formData.startDate !== "") {
       const formatted = validateDateFormat(formData.startDate);
-      if (!formatted) toast.error("Please enter a valid date (YYYY-MM-DD)");
+      if (!formatted) {
+        toast.error("Please enter a valid date (YYYY-MM-DD)")
+        setFormData((prev) => ({ ...prev, startDate: "" }));
+      }
       else {
         const endDate = calculateMonths(
           formData.startDate,
           formData.totalMonths
         );
         setFormData((prev) => ({ ...prev, endDate }));
+      }
+    }
+  };
+
+  const handleBlurDepositDate = () => {
+    if (formData.depositDate !== "") {
+      if (!validateDateFormat(formData.depositDate)) {
+        toast.error("Please enter a valid date (YYYY-MM-DD)");
+        setFormData((prev) => ({ ...prev, depositDate: "" }));
       }
     }
   };
@@ -239,7 +253,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     for="ROI"
                     className="block mb-2 text-sm font-medium text-gray-900 "
                   >
-                    ROI
+                    Profit%
                   </label>
                   <input
                     type="text"
@@ -302,6 +316,43 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                     value={formData.endDate}
                     readOnly
+                  />
+                </div>
+
+                <div className="col-span-2 sm:col-span-1">
+                  <label
+                    for="depositDate"
+                    className="startDate mb-2 text-sm font-medium text-gray-900 "
+                  >
+                    Deposit On YYYY-MM-DD
+                  </label>
+                  <input
+                    type="text"
+                    name="depositDate"
+                    id="depositDate"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                    value={formData.depositDate}
+                    onChange={handleChange}
+                    onBlur={handleBlurDepositDate}
+                    required
+                  />
+                </div>
+
+                <div className="col-span-2 sm:col-span-1">
+                  <label
+                    for="depositType"
+                    className="block mb-2 text-sm font-medium text-gray-900 "
+                  >
+                    Deposit Type
+                  </label>
+                  <input
+                    type="text"
+                    name="depositType"
+                    id="depositType"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                    value={formData.depositType}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
 

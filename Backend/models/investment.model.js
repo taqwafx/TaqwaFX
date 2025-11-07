@@ -35,6 +35,8 @@ const investmentSchema = new mongoose.Schema({
   profitReturnTillDate: { type: Number },
   TotalPaidTillDate: { type: Number },
   durationMonths: { type: Number, required: true },
+  depositDate: { type: Date },
+  depositType: {type: String, required: true},
   bankName: {type: String, required: true},
   bankHolderName: {type: String, required: true},
   bankAcNumber: { type: Number, required: true },

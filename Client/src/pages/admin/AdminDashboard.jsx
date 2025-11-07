@@ -6,14 +6,20 @@ import Loader from "../../components/Loader.jsx";
 import { formatRupee } from "../../utils/helper.js";
 
 const AdminDashboard = () => {
-
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [adminDashboard, setAdminDashboard] = useState({});
-  const { data, isSuccess, isLoading, isError, error } = useGetAdminDashboard();
+  const { data, isSuccess, isLoading, refetch, isError, error } =
+    useGetAdminDashboard();
 
   useEffect(() => {
     setAdminDashboard(data?.data);
   }, [isSuccess]);
+
+  useEffect(() => {
+    if (location.pathname === "/admin/dashboard") {
+      refetch().then((r) => setAdminDashboard(r.data.data));
+    }
+  }, [location.pathname, refetch]);
 
   if (isLoading)
     return (
@@ -99,9 +105,9 @@ const AdminDashboard = () => {
                 >
                   <path
                     stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M3 15v4m6-6v6m6-4v4m6-6v6M3 11l6-5 6 5 5.5-5.5"
                   />
                 </svg>
@@ -154,7 +160,10 @@ const AdminDashboard = () => {
       </div>
 
       <div className="w-full grid xl:flex grid-cols-1 lg:grid-cols-2 gap-3 mt-3">
-        <DonutChart overallStats={adminDashboard?.overallStats} planWiseData={adminDashboard?.planWiseData} />
+        <DonutChart
+          overallStats={adminDashboard?.overallStats}
+          planWiseData={adminDashboard?.planWiseData}
+        />
 
         <div className=" bg-white flex flex-col rounded-lg p-6 border border-slate-200 shadow w-full max-w-[788px] h-[472.8px] max-h-[472.8px]">
           <h1 className="mb-6 font-bold leading-7 text-xl pb-4 border-b border-[#e5e7eb]">
@@ -186,13 +195,17 @@ const AdminDashboard = () => {
                 {adminDashboard?.topInvestors?.map((inv, index) => (
                   <tr
                     key={index}
-                    onClick={() => navigate(`/admin/investors/${inv.investorId}`)}
+                    onClick={() =>
+                      navigate(`/admin/investors/${inv.investorId}`)
+                    }
                     className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
                   >
                     <td className="px-6 py-4 font-medium">{inv?.rank}</td>
                     <td className="px-6 py-4 font-medium">{inv?.investorId}</td>
                     <td className="px-6 py-4 font-medium">{inv?.name}</td>
-                    <td className="px-6 py-4 font-medium">{formatRupee(inv?.totalCapital)}</td>
+                    <td className="px-6 py-4 font-medium">
+                      {formatRupee(inv?.totalCapital)}
+                    </td>
                     <td className="px-6 py-4 font-medium">
                       {inv?.totalInvestments}
                     </td>
@@ -206,7 +219,7 @@ const AdminDashboard = () => {
 
       <div className="bg-white rounded-lg p-6 border border-slate-200 shadow mt-3">
         <h1 className=" mb-6 font-bold leading-7 text-xl pb-4 border-b border-[#e5e7eb]">
-          Next Replayment Investors
+          Comming Replayment Investors
         </h1>
 
         <div className="relative overflow-x-auto">
@@ -240,20 +253,24 @@ const AdminDashboard = () => {
               {adminDashboard?.upcomingRepayments?.map((inv, index) => (
                 <tr
                   key={index}
-                  onClick={() => navigate(`/admin/investors/${inv.investorId}`)}
+                  onClick={() =>
+                    navigate(`/admin/investors/${inv?.investorId}`)
+                  }
                   className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
                 >
                   <td className="px-6 py-4 font-medium">{inv?.investorId}</td>
                   <td className="px-6 py-4 font-medium">{inv?.name}</td>
                   <td className="px-6 py-4 font-medium">
-                    {inv?.joinDate?.split("T")[0]}
+                    {inv?.joinDate?.split("T")[0] || "-"}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {formatRupee(inv?.totalFund)}
                   </td>
-                  <td className="px-6 py-4 font-medium">{inv?.totalInvestments}</td>
                   <td className="px-6 py-4 font-medium">
-                    {inv?.nextRepaymentDate?.split("T")[0]}
+                    {inv?.totalInvestments}
+                  </td>
+                  <td className="px-6 py-4 font-medium">
+                    {inv?.nextRepaymentDate?.split("T")[0] || "-"}
                   </td>
                   <td className="px-6 py-4 font-medium">{inv?.planType}</td>
                 </tr>
@@ -266,4 +283,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard
+export default AdminDashboard;

@@ -72,7 +72,7 @@ const Plans = () => {
                   <span className="text-3xl font-bold text-gray-900">
                     {plan?.returnROI + plan?.capitalROI}%
                   </span>
-                  <span className="text-gray-600 ml-2">Monthly ROI</span>
+                  <span className="text-gray-600 ml-2">Monthly Profit</span>
                 </p>
               </div>
 

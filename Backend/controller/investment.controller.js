@@ -5,9 +5,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { addMonthsSafe } from "../utils/helper.js";
-import mongoose from "mongoose"
-
-
+import mongoose from "mongoose";
 
 // Create Investment
 export const createInvestment = asyncHandler(async (req, res) => {
@@ -17,6 +15,8 @@ export const createInvestment = asyncHandler(async (req, res) => {
     planId,
     returnROI,
     startDate,
+    depositDate,
+    depositType,
     bankName,
     bankHolderName,
     bankAcNumber,
@@ -115,6 +115,8 @@ export const createInvestment = asyncHandler(async (req, res) => {
     profitReturnTillDate: 0,
     TotalPaidTillDate: 0,
     durationMonths,
+    depositDate,
+    depositType,
     bankName,
     bankHolderName,
     bankAcNumber,
@@ -164,6 +166,8 @@ export const getInvestmentDetails = asyncHandler(async (req, res) => {
     capitalReturnTillDate: investment.capitalReturnTillDate,
     profitReturnTillDate: investment.profitReturnTillDate,
     totalPaidTillDate: investment.TotalPaidTillDate,
+    depositDate: investment.depositDate,
+    depositType: investment.depositType,
     bankName: investment.bankName,
     bankHolderName: investment.bankHolderName,
     bankAcNumber: investment.bankAcNumber,
