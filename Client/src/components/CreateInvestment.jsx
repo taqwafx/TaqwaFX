@@ -56,10 +56,9 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
     if (formData.startDate !== "") {
       const formatted = validateDateFormat(formData.startDate);
       if (!formatted) {
-        toast.error("Please enter a valid date (YYYY-MM-DD)")
+        toast.error("Please enter a valid date (YYYY-MM-DD)");
         setFormData((prev) => ({ ...prev, startDate: "" }));
-      }
-      else {
+      } else {
         const endDate = calculateMonths(
           formData.startDate,
           formData.totalMonths
@@ -103,6 +102,8 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
         returnROI: null,
         startDate: "",
         endDate: "",
+        depositDate: "",
+        depositType: "",
         totalMonths: null,
         bankName: "",
         bankHolderName: "",
@@ -127,6 +128,8 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
       returnROI: "",
       startDate: "",
       endDate: "",
+      depositDate: "",
+      depositType: "",
       totalMonths: "",
       bankName: "",
       bankHolderName: "",
@@ -374,7 +377,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                   />
                 </div>
 
-                <div className="col-span-1">
+                <div className="col-span-2 sm:col-span-1">
                   <label
                     for="bankHolderName"
                     className="block mb-2 text-sm font-medium text-gray-900"

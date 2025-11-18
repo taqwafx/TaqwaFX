@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useGetInvestmentDetails } from "../../hooks/appHook.js";
 import Loader from "../../components/Loader.jsx";
 import toast from "react-hot-toast";
-import { formatRupee } from "../../utils/helper.js";
+import { addMonthsSafe, formatRupee } from "../../utils/helper.js";
 import UpdateRetunMonthForm from "../../components/UpdateRetunMonthForm.jsx";
 
 const Investment = () => {
@@ -161,7 +161,7 @@ const Investment = () => {
                   Start from:
                 </h3>
                 <p className="text-slate-600">
-                  {investment?.startFrom?.split("T")[0] || "-"}
+                  {investment?.monthlyReturns[0]?.returnDate?.split("T")[0] || "-"}
                 </p>
               </div>
             </div>
@@ -430,8 +430,10 @@ const Investment = () => {
                 </h3>
                 <h3 className="mt-1 text-md text-start font-normal text-gray-800">
                   Deposit On:{" "}
-                  <span className="font-medium">{investment?.depositDate?.split("T")[0] || "-"}</span>,
-                  Depost Type:{" "}
+                  <span className="font-medium">
+                    {investment?.depositDate?.split("T")[0] || "-"}
+                  </span>
+                  , Depost Type:{" "}
                   <span className=" font-medium">
                     {investment?.depositType}
                   </span>

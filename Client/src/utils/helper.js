@@ -57,3 +57,15 @@ export function calculateMonths(startDateStr, totalMonths) {
 
   return `${resultYear}-${resultMonth}-${resultDay}`;
 }
+
+export const addMonthsSafe = (date, months) => {
+  const d = new Date(date);
+  const day = d.getDate();
+  d.setMonth(d.getMonth() + months);
+
+  // handle month overflow (e.g., Jan 31 -> Feb)
+  if (d.getDate() < day) {
+    d.setDate(0);
+  }
+  return d;
+};

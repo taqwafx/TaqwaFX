@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useGetInvestorDetails, useUpdatePassword } from "../../hooks/appHook.js";
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader.jsx";
-import { formatRupee } from "../../utils/helper.js";
+import { addMonthsSafe, formatRupee } from "../../utils/helper.js";
 import CreateInvestment from "../../components/CreateInvestment.jsx";
 import { strongPasswordRegex } from "../../utils/validations.js";
 
@@ -424,7 +424,7 @@ const Investor = () => {
                   <td className="px-6 py-4 font-medium">{inv?.planType}</td>
                   <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
                   <td className="px-6 py-4 font-medium">
-                    {inv?.startDate?.split("T")[0] || '-'}
+                    {addMonthsSafe(inv?.startDate, 1)?.toISOString()?.split("T")[0] || '-'}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {inv?.endDate?.split("T")[0] || '-'}

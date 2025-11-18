@@ -6,6 +6,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { addMonthsSafe } from "../utils/helper.js";
 import mongoose from "mongoose";
+import { sendSMS } from "../services/sms.js";
 
 // Create Investment
 export const createInvestment = asyncHandler(async (req, res) => {
@@ -55,12 +56,13 @@ export const createInvestment = asyncHandler(async (req, res) => {
 
     // default policy: capital returned only on last month
     let capitalReturn = (Number(capital) * plan.capitalROI) / 100;
-    const profitReturn = (Number(capital) * Number(returnROI)) / 100;
-    const totalReturn = capitalReturn + profitReturn;
+    let profitReturn = (Number(capital) * Number(returnROI)) / 100;
+    let totalReturn = capitalReturn + profitReturn;
     remainingCapital = Number(remainingCapital) - Number(totalReturn);
 
     if (plan.capitalROI === 0 && i === durationMonths) {
       capitalReturn = capital;
+      totalReturn += Number(capital);
       remainingCapital = remainingCapital - capital;
     }
 
@@ -123,6 +125,13 @@ export const createInvestment = asyncHandler(async (req, res) => {
     bankIFSCCode,
     monthlyReturns,
   });
+
+  const startOn = addMonthsSafe(sDate, 1)?.toISOString()?.split("T")[0];
+
+  await sendSMS(
+    `+91${user[0]?.phone}`,
+    `Congratulations, ${user[0]?.name}! 🎉 Your investment of ₹${capital} in Plan ${plan?.planName} is now active. \n\nFirst Payment Date: ${startOn}\n INV ID: ${investmentId} \n\nAapke Profits yaha dekhe: ${process.env.APP_LOGIN_SHORT_LINK}`
+  );
 
   return res
     .status(201)
@@ -192,11 +201,14 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
     : { investmentId: id };
 
   // find the investment and populate plan for name/roi
-  const investment = await investmentModel.findOne(query);
+  const investment = await investmentModel.findOne(query).populate('plan');
 
   if (!investment) {
     throw new ApiError(404, "Investment not found");
   }
+
+  // find User
+  const user = await userModel.findById(investment.user);
 
   const monthIndex = investment.monthlyReturns.findIndex(
     (m) => m.monthNo === +monthNo
@@ -238,9 +250,25 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
 
   // if all months paid => mark investment as Completed
   const allPaid = investment.monthlyReturns.every((m) => m.status === "paid");
-  if (allPaid) investment.status = "Complete";
+  if (allPaid) {
+    investment.status = "Complete";
+
+    const totalReturn = investment.monthlyReturns.reduce((sum, item) => sum + Number(item.capitalReturn + item.profitReturn), 0);
+      const OnDate = investment?.endDate?.toISOString()?.split("T")[0];
+    await sendSMS(
+      `+91${user?.phone}`,
+      `Congratulations, ${user?.name}! 🎉 your investment is now completed. \n\nReturned Amount: ₹${totalReturn} \n(Principal + Profit) \n\nINV ID: ${investment?.investmentId} \nPlan: ${investment?.plan?.planName}  \nEnd Date: ${OnDate} \n\nThank you for choosing TaqwaFX as your investment partner.`
+    );
+  }
+  
 
   await investment.save();
+  const returnMonth = month?.returnDate?.toISOString()?.split("T")[0];
+
+  await sendSMS(
+    `+91${user?.phone}`,
+    `Congratulations, ${user?.name}! 🎉 Aapka ${returnMonth} month ka profit credit ho chuka hai. \n\nAmount: ₹${month?.totalReturn} \n UTR Number: ${paymentProof}\n Repayment Month No: ${month?.monthNo} \n\nLogin krke Aapke details yaha dekhe. ${process.env.APP_LOGIN_SHORT_LINK}`
+  );
 
   return res
     .status(200)

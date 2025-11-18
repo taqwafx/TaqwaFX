@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetInvestoInvestments } from "../../hooks/appHook.js";
 import Loader from "../../components/Loader.jsx";
 import toast from "react-hot-toast";
-import { formatRupee } from "../../utils/helper.js";
+import { addMonthsSafe, formatRupee } from "../../utils/helper.js";
 
 const UserInvestments = () => {
   const navigate = useNavigate();
@@ -102,7 +102,7 @@ const UserInvestments = () => {
                   <td className="px-6 py-4 font-medium">{formatRupee(inv?.capital)}</td>
                   <td className="px-6 py-4 font-medium">{inv?.planType}</td>
                   <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
-                  <td className="px-6 py-4 font-medium text-nowrap">{inv?.startFrom?.split("T")[0] || '-'}</td>
+                  <td className="px-6 py-4 font-medium text-nowrap">{addMonthsSafe(inv?.startFrom, 1)?.toISOString()?.split("T")[0] || '-'}</td>
                   <td className="px-6 py-4 font-medium text-nowrap">{inv?.endFrom?.split("T")[0] || '-'}</td>
                   <td className="px-6 py-4 font-medium text-nowrap">{inv?.repaymentOn?.split("T")[0] || "-"}</td>
                   <td className="px-6 py-4 font-medium">{inv?.completedMonths}</td>

@@ -4,9 +4,9 @@ import { investmentModel } from "../models/investment.model.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import mongoose from "mongoose"
-import jwt from "jsonwebtoken"
-
+import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+import { sendSMS } from "../services/sms.js";
 
 export const getMe = asyncHandler(async (req, res) => {
   const user = await userModel.findById(req.user._id).select("-password");
@@ -86,9 +86,12 @@ export const registerInvestor = asyncHandler(async (req, res) => {
   }
 
   // check if email or phone already exists
-  const existingUser = await userModel.findOne({ email });
+  const existingUser = await userModel.findOne({
+    $or: [{ email: email }, { phone: phone }],
+  });
+
   if (existingUser) {
-    throw new ApiError(400, "Investor already exists with this email");
+    throw new ApiError(400, "Investor already exists with this email or Mo. Number");
   }
 
   // count total investors to generate unique ID
@@ -116,6 +119,11 @@ export const registerInvestor = asyncHandler(async (req, res) => {
   });
 
   investor.password = password;
+
+  await sendSMS(
+    `+91${phone}`,
+    `Dear ${name}, welcome to TaqwaFX! 🎉 Your investor account is ready.\n\nInvestor/Login ID: ${newInvestorId} \nPassword: ${password} \nLogin krke Aapke details yaha dekhe: ${process.env.APP_LOGIN_SHORT_LINK} \n\nWe're excited to have you with us.`
+  );
 
   return res
     .status(201)
@@ -472,6 +480,12 @@ export const updateInvestorPassword = asyncHandler(async (req, res) => {
   // ✅ Update password
   investor.password = newPassword; // your schema should hash it in pre-save hook
   await investor.save();
+
+  await sendSMS(
+    `+91${investor?.phone}`,
+    `Dear ${investor?.name}, your TaqwaFX login password has been changed. \n\nYour New login Password is: \n${newPassword} \n\nThank you for staying with us.
+`
+  );
 
   // ✅ Send response
   return res

@@ -113,7 +113,8 @@ const UserInvestment = () => {
                   Start from:
                 </h3>
                 <p className="text-slate-600">
-                  {investment?.startFrom?.split("T")[0] || "-"}
+                  {investment?.monthlyReturns[0]?.returnDate?.split("T")[0] ||
+                    "-"}
                 </p>
               </div>
             </div>
@@ -254,7 +255,7 @@ const UserInvestment = () => {
                   Payment Status
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Payment type DR.
+                  Payment type CR.
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Payment Proof.
