@@ -122,7 +122,7 @@ export const registerInvestor = asyncHandler(async (req, res) => {
 
   await sendSMS(
     `+91${phone}`,
-    `Dear ${name}, welcome to TaqwaFX! 🎉 Your investor account is ready.\n\nInvestor/Login ID: ${newInvestorId} \nPassword: ${password} \nLogin krke Aapke details yaha dekhe: ${process.env.APP_LOGIN_SHORT_LINK} \n\nWe're excited to have you with us.`
+    `Dear ${name}, welcome to TaqwaFX! Investor account is ready. Login ID: ${newInvestorId} / Pswd: ${password} details: ${process.env.APP_LOGIN_SHORT_LINK}`
   );
 
   return res
