@@ -17,10 +17,7 @@ export const createPlan = asyncHandler(async (req, res) => {
   } = req.body;
 
   if (!planName || !returnROI || !durationMonths || !minInvestment) {
-    throw new ApiError(
-      400,
-      "All fields are required"
-    );
+    throw new ApiError(400, "All fields are required");
   }
 
   // check if plan already exists
@@ -29,11 +26,15 @@ export const createPlan = asyncHandler(async (req, res) => {
     throw new ApiError(409, "Plan with this name already exists");
   }
 
+  const overallROI = /[a-zA-Z]/.test(returnROI)
+    ? returnROI
+    : Number(capitalROI) + Number(returnROI);
+
   const plan = await planModel.create({
     planName,
     capitalROI,
     returnROI,
-    overallMROI: capitalROI + returnROI,
+    overallMROI: overallROI,
     durationMonths,
     minInvestment,
     description,

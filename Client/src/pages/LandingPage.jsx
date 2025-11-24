@@ -1,27 +1,31 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../components/Logo.jsx";
 import toast from "react-hot-toast";
-
-
-const plans = [
-  {
-    name: "Silver Plan",
-    roi: "5%",
-    duration: "12 Months",
-    minimum: "1,00,000",
-    highlighted: false,
-  },
-  {
-    name: "Gold Plan",
-    roi: "5+5%",
-    duration: "20 Months",
-    minimum: "1,00,000",
-    highlighted: true,
-  },
-];
+import PlanInfo from "../components/PlanInfo.jsx";
+import { useGetPlans } from "../hooks/appHook.js";
+import Loader from "../components/Loader.jsx";
+import { formatRupee } from "../utils/helper.js";
 
 const LandingPage = () => {
+  const [showPlanInfo, setShowPlanInfo] = useState(false);
+  const [plans, setPlans] = useState([]);
+  const [spacificPlan, setSpacificPlan] = useState({});
+
+  const { data, isSuccess, isLoading, isError } = useGetPlans();
+
+  useEffect(() => {
+    setPlans(data?.data);
+  }, [isSuccess, data]);
+
+  if (isLoading)
+    return (
+      <div className=" w-full h-full flex justify-center items-center mt-[250px]">
+        <Loader />
+      </div>
+    );
+  if (isError) toast.error("Something went wrong!");
+
   return (
     <>
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
@@ -150,45 +154,50 @@ const LandingPage = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {plans.map((plan, index) => (
+          {plans?.map((plan, index) => (
             <div
               key={index}
               className={`rounded-lg p-8 space-y-6 transition ${
-                plan.highlighted
+                index % 2 == 0
                   ? "bg-blue-50 border-2 border-blue-100"
                   : "bg-white border border-gray-200"
               }`}
             >
-              <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {plan?.planName}
+              </h3>
 
               <div className="space-y-4">
                 <div>
                   <p className="text-gray-600">
                     <span className="text-3xl font-bold text-gray-900">
-                      {plan.roi}
+                      {plan?.overallMROI}%
                     </span>
                     <span className="text-gray-600 ml-2">Monthly Profit</span>
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-gray-900 font-semibold">{plan.duration}</p>
+                  <p className="text-gray-900 font-semibold">
+                    {plan?.durationMonths} Months
+                  </p>
                 </div>
 
                 <div>
                   <p className="text-gray-900 font-semibold">
-                    Min. {plan.minimum}
+                    Min. {formatRupee(plan?.minInvestment)}
                   </p>
                 </div>
               </div>
 
               <button
-                onClick={() =>
-                  toast.error("Please Contact the Admin to Invest.", "Info")
-                }
+                onClick={() => {
+                  setShowPlanInfo((prev) => !prev);
+                  setSpacificPlan(plan);
+                }}
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition cursor-pointer"
               >
-                Get Started
+                See More info...
               </button>
             </div>
           ))}
@@ -238,8 +247,14 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+
+      <PlanInfo
+        showPlanInfo={showPlanInfo}
+        setShowPlanInfo={setShowPlanInfo}
+        spacificPlan={spacificPlan}
+      />
     </>
   );
 };
 
-export default LandingPage
+export default LandingPage;

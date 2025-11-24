@@ -8,6 +8,7 @@ const monthSchema = new mongoose.Schema(
     profitReturn: { type: Number },
     totalReturn: { type: Number },
     remainingBalance: { type: Number },
+    profitPercentage: { type: Number },
     status: {
       type: String,
       enum: ["pending", "paid"],
@@ -25,7 +26,8 @@ const investmentSchema = new mongoose.Schema({
   investmentId: { type: String, required: true }, // e.g. INVST001
   capital: { type: Number, required: true },
   plan: { type: mongoose.Schema.Types.ObjectId, ref: "Plans", required: true },
-  roi: { type: Number, required: true },
+  roi: { type: String, required: true },
+  roiUnknown: { type: Boolean, default: false },
   startDate: { type: Date, default: Date.now },
   endDate: { type: Date },
   repaymentDate: { type: Date },

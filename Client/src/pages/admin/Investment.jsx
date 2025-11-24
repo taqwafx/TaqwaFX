@@ -161,7 +161,7 @@ const Investment = () => {
                   Start from:
                 </h3>
                 <p className="text-slate-600">
-                  {investment?.monthlyReturns[0]?.returnDate?.split("T")[0] || "-"}
+                  {investment?.fristReturnDate?.split("T")[0] || "-"}
                 </p>
               </div>
             </div>
@@ -290,7 +290,9 @@ const Investment = () => {
                   Total Return
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Remaining Balance
+                  {investment?.roiUnknown
+                    ? "Profit%"
+                    : "Remaining Balance"}
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Payment Status
@@ -323,7 +325,11 @@ const Investment = () => {
                     {formatRupee(month?.totalReturn)}
                   </td>
                   <td className="px-6 py-4 font-medium">
-                    {formatRupee(month?.remainingBalance)}
+                    {investment?.roiUnknown
+                      ? month?.profitPercentage === 0
+                        ? "-"
+                        : `${month?.profitPercentage}%`
+                      : formatRupee(month?.remainingBalance)}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     <span
@@ -365,6 +371,7 @@ const Investment = () => {
           setShowModel={setShowModel}
           repaymentData={repaymentData}
           setInvestment={setInvestment}
+          investment={investment}
           refetch={refetch}
         />
       )}

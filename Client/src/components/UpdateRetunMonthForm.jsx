@@ -9,6 +9,7 @@ const UpdateRetunMonthForm = ({
   setShowModel,
   repaymentData,
   setInvestment,
+  investment,
   refetch,
 }) => {
   const markMonth = useMarkMonthAsPaid();
@@ -17,13 +18,22 @@ const UpdateRetunMonthForm = ({
     monthNo: 0,
     paymentType: "",
     paymentProof: "",
+    roiUnknown: false,
   });
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    if (e.target.name === "paymentType" || e.target.name === "paymentProof")
+      return setFormData((prev) => ({
+        ...prev,
+        [e.target.name]: e.target.value,
+      }));
+
+    if (/^\d*$/.test(e.target.value)) {
+      setFormData((prev) => ({
+        ...prev,
+        [e.target.name]: e.target.value,
+      }));
+    }
   };
 
   const handleSubmit = (e) => {
@@ -42,8 +52,9 @@ const UpdateRetunMonthForm = ({
       ...prev,
       monthNo: repaymentData.monthNo,
       id: repaymentData.id,
+      roiUnknown: investment.roiUnknown
     }));
-  }, [repaymentData]);
+  }, [repaymentData, investment]);
 
   const refatchData = async () => {
     refetch().then((r) => setInvestment(r?.data.data));
@@ -165,6 +176,24 @@ const UpdateRetunMonthForm = ({
                     id="paymentProof"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                     value={formData.paymentProof}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="col-span-2 sm:col-span-1 mb-4">
+                  <label
+                    for="profit"
+                    className="block mb-2 text-sm font-medium text-gray-900 "
+                  >
+                    Profit
+                  </label>
+                  <input
+                    disabled={!formData?.roiUnknown}
+                    type="text"
+                    name="profit"
+                    id="profit"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                    value={formData?.profit}
                     onChange={handleChange}
                     required
                   />

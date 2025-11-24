@@ -8,7 +8,7 @@ import { isAdmin, verifyToken } from "../middlewares/auth.middleware.js";
 const router = Router();
 
 router.route("/create").post(verifyToken, isAdmin, createPlan);
-router.route("/featch").get(verifyToken, getAllPlans);
-router.route("/delete/:planId").delete(verifyToken, deletePlan);
+router.route("/featch").get(getAllPlans);
+router.route("/delete/:planId").delete(verifyToken, isAdmin, deletePlan);
 
 export default router;

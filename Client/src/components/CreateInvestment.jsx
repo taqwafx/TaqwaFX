@@ -38,6 +38,12 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
           [e.target.name]: e.target.value,
         }));
       }
+
+      if (e.target.value === "-" && e.target.name === "returnROI")
+        return setFormData((prev) => ({
+          ...prev,
+          [e.target.name]: e.target.value,
+        }));
     } else {
       setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     }

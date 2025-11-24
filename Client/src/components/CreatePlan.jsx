@@ -18,7 +18,11 @@ const CreatePlan = () => {
   });
 
   const handleChange = (e) => {
-    if (e.target.name === "planName")
+    if (
+      e.target.name === "planName" ||
+      e.target.name === "returnROI" ||
+      e.target.name === "description"
+    )
       return setFormData((prev) => ({
         ...prev,
         [e.target.name]: e.target.value,
@@ -217,6 +221,24 @@ const CreatePlan = () => {
                       onChange={handleChange}
                       required
                     />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label
+                      htmlFor="description"
+                      className="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                      Write About Plan
+                    </label>
+                    <textarea
+                      name="description"
+                      id="description"
+                      rows="4"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      placeholder="description.."
+                      value={formData.description}
+                      onChange={handleChange}
+                    ></textarea>
                   </div>
                 </div>
               </div>

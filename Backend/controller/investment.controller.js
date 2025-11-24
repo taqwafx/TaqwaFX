@@ -38,51 +38,82 @@ export const createInvestment = asyncHandler(async (req, res) => {
   const plan = await planModel.findById(planId);
   if (!plan) throw new ApiError(404, "Plan not found");
 
-  const roi = Number(returnROI) + Number(plan.capitalROI); // monthly %
+  // detect unknown ROI (user passed '-' exactly or trimmed)
+  const roiUnknown = String(returnROI).trim() === "-";
+
+  // compute roi (for storage) — keep null if unknown
+  const roi = roiUnknown ? null : Number(returnROI) + Number(plan.capitalROI);
   const durationMonths = plan.durationMonths;
   const sDate = startDate ? new Date(startDate) : new Date();
 
   // monthly profit (simple percentage of capital)
-  const monthlyProfit = (Number(capital) * Number(returnROI)) / 100;
+  const monthlyProfit = roiUnknown
+    ? 0
+    : (Number(capital) * Number(returnROI)) / 100;
 
   // build monthlyReturns array
   const monthlyReturns = [];
-  let remainingCapital =
-    Number(monthlyProfit) * Number(plan.durationMonths) + Number(capital);
 
-  for (let i = 1; i <= durationMonths; i++) {
-    // repayment date: i months after startDate
-    const returnDate = addMonthsSafe(sDate, i);
+  if (roiUnknown) {
+    // When ROI unknown: set numeric fields to 0 (safe), and placeholders for percentages/balances
+    for (let i = 1; i <= durationMonths; i++) {
+      const returnDate = addMonthsSafe(sDate, i);
+      let capitalReturn = 0;
 
-    // default policy: capital returned only on last month
-    let capitalReturn = (Number(capital) * plan.capitalROI) / 100;
-    let profitReturn = (Number(capital) * Number(returnROI)) / 100;
-    let totalReturn = capitalReturn + profitReturn;
-    remainingCapital = Number(remainingCapital) - Number(totalReturn);
+      if (plan.capitalROI === 0 && i === durationMonths) {
+        capitalReturn = capital;
+      }
 
-    if (plan.capitalROI === 0 && i === durationMonths) {
-      capitalReturn = capital;
-      totalReturn += Number(capital);
-      remainingCapital = remainingCapital - capital;
+      monthlyReturns.push({
+        monthNo: i,
+        returnDate,
+        capitalReturn,
+        profitReturn: 0,
+        totalReturn: 0,
+        profitPercentage: 0,
+        status: "pending",
+        paymentType: "",
+        paymentProof: "",
+      });
     }
+  } else {
+    let remainingCapital =
+      Number(monthlyProfit) * Number(plan.durationMonths) + Number(capital);
 
-    // const capitalReturn = i === durationMonths ? +capital : 0;
+    for (let i = 1; i <= durationMonths; i++) {
+      // repayment date: i months after startDate
+      const returnDate = addMonthsSafe(sDate, i);
 
-    monthlyReturns.push({
-      monthNo: i,
-      returnDate,
-      capitalReturn,
-      profitReturn,
-      totalReturn,
-      remainingBalance: +remainingCapital, // capital remaining after this month payment (before marking paid)
-      status: "pending",
-      paymentType: "",
-      paymentProof: "",
-    });
+      // default policy: capital returned only on last month
+      let capitalReturn = (Number(capital) * plan.capitalROI) / 100;
+      let profitReturn = (Number(capital) * Number(returnROI)) / 100;
+      let totalReturn = capitalReturn + profitReturn;
+      remainingCapital = Number(remainingCapital) - Number(totalReturn);
+
+      if (plan.capitalROI === 0 && i === durationMonths) {
+        capitalReturn = capital;
+        totalReturn += Number(capital);
+        remainingCapital = remainingCapital - capital;
+      }
+
+      monthlyReturns.push({
+        monthNo: i,
+        returnDate,
+        capitalReturn,
+        profitReturn,
+        totalReturn,
+        remainingBalance: +remainingCapital, // capital remaining after this month payment (before marking paid)
+        status: "pending",
+        paymentType: "",
+        paymentProof: "",
+      });
+    }
   }
 
   const endDate = addMonthsSafe(sDate, durationMonths);
-  const overallReturn = monthlyProfit * plan.durationMonths + Number(capital);
+  const overallReturn = roiUnknown
+    ? null
+    : monthlyProfit * plan.durationMonths + Number(capital);
 
   // generate investmentId (you can swap to your ID generator)
   const investorIdNumb = userId?.replace("TFX", "");
@@ -108,7 +139,8 @@ export const createInvestment = asyncHandler(async (req, res) => {
     investmentId,
     capital,
     plan: planId,
-    roi,
+    roi: roiUnknown ? plan?.returnROI : roi,
+    roiUnknown,
     startDate: sDate,
     endDate,
     status: "Active",
@@ -167,7 +199,9 @@ export const getInvestmentDetails = asyncHandler(async (req, res) => {
     capital: investment.capital,
     planType: investment.plan?.planName || "N/A",
     roi: investment.roi,
+    roiUnknown: investment.roiUnknown,
     startFrom: investment.startDate,
+    fristReturnDate: investment.monthlyReturns[0]?.returnDate,
     endFrom: investment.endDate,
     repaymentOn,
     status: investment.status,
@@ -194,14 +228,14 @@ export const getInvestmentDetails = asyncHandler(async (req, res) => {
 // Mark month paid
 export const markMonthPaid = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { monthNo, paymentType, paymentProof } = req.body;
+  const { monthNo, paymentType, paymentProof, roiUnknown, profit } = req.body;
 
   const query = mongoose.Types.ObjectId.isValid(id)
     ? { _id: id }
     : { investmentId: id };
 
   // find the investment and populate plan for name/roi
-  const investment = await investmentModel.findOne(query).populate('plan');
+  const investment = await investmentModel.findOne(query).populate("plan");
 
   if (!investment) {
     throw new ApiError(404, "Investment not found");
@@ -232,28 +266,57 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
   if (month.status === "paid")
     throw new ApiError(400, "This month is already marked paid");
 
-  // update month entry
-  month.status = "paid";
-  month.paymentType = paymentType || month.paymentType;
-  month.paymentProof = paymentProof || month.paymentProof;
+  if (roiUnknown) {
+    // update month entry
+    month.status = "paid";
+    month.paymentType = paymentType || month.paymentType;
+    month.paymentProof = paymentProof || month.paymentProof;
+    month.profitReturn = profit;
+    month.totalReturn = profit;
+    month.profitPercentage =
+      (Number(profit) / Number(investment?.capital)) * 100;
 
-  // update cumulative fields
-  investment.profitReturnTillDate = +(
-    (investment.profitReturnTillDate || 0) + (month.profitReturn || 0)
-  );
-  investment.capitalReturnTillDate = +(
-    (investment.capitalReturnTillDate || 0) + (month.capitalReturn || 0)
-  );
-  investment.TotalPaidTillDate = +(
-    investment.profitReturnTillDate + investment.capitalReturnTillDate
-  );
+    // update cumulative fields
+    investment.profitReturnTillDate = +Number(
+      (investment.profitReturnTillDate || 0) + Number(profit || 0)
+    );
+    investment.capitalReturnTillDate = +Number(
+      (investment.capitalReturnTillDate || 0) + Number(month.capitalReturn || 0)
+    );
+    investment.TotalPaidTillDate = +(
+      investment.profitReturnTillDate + investment.capitalReturnTillDate
+    );
+  } else {
+    // update month entry
+    month.status = "paid";
+    month.paymentType = paymentType || month.paymentType;
+    month.paymentProof = paymentProof || month.paymentProof;
+
+    // update cumulative fields
+    investment.profitReturnTillDate = +(
+      (investment.profitReturnTillDate || 0) + (month.profitReturn || 0)
+    );
+    investment.capitalReturnTillDate = +(
+      (investment.capitalReturnTillDate || 0) + (month.capitalReturn || 0)
+    );
+    investment.TotalPaidTillDate = +(
+      investment.profitReturnTillDate + investment.capitalReturnTillDate
+    );
+  }
 
   // if all months paid => mark investment as Completed
   const allPaid = investment.monthlyReturns.every((m) => m.status === "paid");
   if (allPaid) {
     investment.status = "Complete";
 
-    const totalReturn = investment.monthlyReturns.reduce((sum, item) => sum + Number(item.capitalReturn + item.profitReturn), 0);
+    if (roiUnknown) {
+      investment.overallReturn = investment.TotalPaidTillDate;
+    }
+
+    const totalReturn = investment.monthlyReturns.reduce(
+      (sum, item) => sum + Number(item.capitalReturn + item.profitReturn),
+      0
+    );
     const OnDate = investment?.endDate?.toISOString()?.split("T")[0];
     await sendSMS(
       `+91${user?.phone}`,
@@ -261,7 +324,7 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
     );
   }
 
-
+  
   await investment.save();
   const returnMonth = month?.returnDate?.toISOString()?.split("T")[0];
 

@@ -70,7 +70,7 @@ const Plans = () => {
               <div>
                 <p className="text-gray-600 flex flex-wrap">
                   <span className="text-3xl font-bold text-gray-900">
-                    {plan?.returnROI + plan?.capitalROI}%
+                    {plan?.overallMROI}%
                   </span>
                   <span className="text-gray-600 ml-2">Monthly Profit</span>
                 </p>
