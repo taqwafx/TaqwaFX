@@ -330,7 +330,7 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
 
   await sendSMS(
     `+91${user?.phone}`,
-    `TaqwaFX: Congratulations, ${user?.name}! Profit of Rs.${month?.totalReturn} is credited on ${returnMonth}. UTR No: ${paymentProof}. Repayment Month No: 1. Details: ${process.env.APP_LOGIN_SHORT_LINK}`
+    `TaqwaFX: Congrats, ${user?.name}! Rs.${month?.totalReturn} profit credited on ${returnMonth}. UTR: ${paymentProof}. Repayment Month: ${monthNo}. Details: ${process.env.APP_LOGIN_SHORT_LINK}`
   );
 
   return res
