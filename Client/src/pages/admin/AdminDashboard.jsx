@@ -254,7 +254,7 @@ const AdminDashboard = () => {
                 <tr
                   key={index}
                   onClick={() =>
-                    navigate(`/admin/investors/${inv?.investorId}`)
+                    navigate(`/admin/investors/${inv?.investorId}/investment/${inv?.investmentId}`)
                   }
                   className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
                 >

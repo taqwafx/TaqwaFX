@@ -4,7 +4,6 @@ import { investmentModel } from "../models/investment.model.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-
 export const getAdminDashboard = asyncHandler(async (req, res) => {
   // 1️⃣ Total investors (case-insensitive)
   const totalInvestors = await userModel.countDocuments({
@@ -119,6 +118,7 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
     { $unwind: "$plan" },
     {
       $project: {
+        investmentId: "$investmentId",
         investorId: "$user.userId",
         name: "$user.name",
         joinDate: "$user.createdAt",
@@ -137,6 +137,7 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
     const id = repay.userId.toString();
     if (!investorMap.has(id)) {
       investorMap.set(id, {
+        investmentId: repay.investmentId,
         investorId: repay.investorId,
         name: repay.name,
         joinDate: repay.joinDate,

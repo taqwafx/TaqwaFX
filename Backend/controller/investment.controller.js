@@ -117,21 +117,28 @@ export const createInvestment = asyncHandler(async (req, res) => {
 
   // generate investmentId (you can swap to your ID generator)
   const investorIdNumb = userId?.replace("TFX", "");
-  const lastInvestment = await investmentModel
-    .findOne({ userId })
-    .sort({ investmentId: -1 })
-    .limit(1);
+  const lastInvestment = await investmentModel.aggregate([
+    {
+      $match: { userId: "TFX5001" },
+    },
+    {
+      $addFields: {
+        investmentNumber: {
+          $toInt: {
+            $arrayElemAt: [{ $split: ["$investmentId", "-"] }, 1],
+          },
+        },
+      },
+    },
+    {
+      $sort: { investmentNumber: -1 },
+    },
+    {
+      $limit: 1,
+    },
+  ]);
 
-  let nextSubNum = 0; // start at 1 by default
-
-  if (lastInvestment && lastInvestment.investmentId) {
-    // Example: INV5001-3 → get the number after the hyphen
-    const parts = lastInvestment.investmentId.split("-");
-    const lastSubNum = parseInt(parts[1]);
-    nextSubNum = lastSubNum;
-  }
-
-  const investmentId = `INV${investorIdNumb}-${nextSubNum + 1}`;
+  const investmentId = `INV${investorIdNumb}-${lastInvestment[0]?.investmentNumber + 1}`;
 
   const investment = await investmentModel.create({
     user: user[0]?._id,
