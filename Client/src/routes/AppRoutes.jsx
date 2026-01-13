@@ -26,6 +26,8 @@ import UserPlans from "../pages/user/UserPlans.jsx";
 
 import "flowbite";
 import "flowbite-react";
+import Transactions from "../pages/admin/Transactions.jsx";
+import Provider from "../pages/admin/Provider.jsx";
 
 const AppRoutes = () => {
   return (
@@ -45,6 +47,8 @@ const AppRoutes = () => {
             element={<Investment />}
           />
           <Route path="/admin/plans" element={<Plans />} />
+          <Route path="/admin/transactions" element={<Transactions />} />
+          <Route path="/admin/providerflow" element={<Provider />} />
         </Route>
 
         {/* User Routes */}
