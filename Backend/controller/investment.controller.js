@@ -7,6 +7,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { addMonthsSafe } from "../utils/helper.js";
 import mongoose from "mongoose";
 import { sendSMS } from "../services/sms.js";
+import { TransactionModel } from "../models/Transactions.model.js";
 
 // Create Investment
 export const createInvestment = asyncHandler(async (req, res) => {
@@ -331,9 +332,22 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
     );
   }
 
-  
   await investment.save();
   const returnMonth = month?.returnDate?.toISOString()?.split("T")[0];
+
+  // create a new transaction
+  TransactionModel.create({
+    user: investment.user,
+    userId: investment.userId,
+    investment: investment._id,
+    investmentId: investment.investmentId,
+    paidMonthNo: month.monthNo,
+    returnDate: month.returnDate,
+    paidAMT: roiUnknown ? profit : month?.totalReturn,
+    paidAt: new Date(),
+    paymentType: paymentType,
+    plan: investment.plan._id,
+  });
 
   await sendSMS(
     `+91${user?.phone}`,

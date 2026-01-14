@@ -53,9 +53,7 @@ export const createInvestment = async (formData) => {
 };
 
 export const markMonthPaid = async (formData) => {
-  console.log(formData);
-  
-  const res = await api.post(`/investment/markmonthpaid/${formData.id}`, formData);
+  const res = await api.post(`/investment/markmonthpaid/${formData.id}`,formData);
   return res.data;
 };
 
@@ -74,6 +72,21 @@ export const deletePlan = async (planId) => {
   return res.data;
 };
 
+export const getTransactions = async ({ pageParam = 1, queryKey }) => {
+  const [_key, filters] = queryKey;
+  const { date } = filters || {};
+
+  const limit = 10;
+
+  let url = `/transactions/featch?page=${pageParam}&limit=${limit}`;
+
+  if (date) {
+    url += `&date=${date}`;
+  }
+
+  const res = await api.get(url);
+  return res.data;
+};
 
 // user Api's
 export const getUserDashboard = async () => {

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import {
   createInvestment,
   createInvestor,
@@ -10,6 +10,7 @@ import {
   getInvestorInvestments,
   getInvestors,
   getPlan,
+  getTransactions,
   getUserDashboard,
   loginUser,
   logOut,
@@ -189,6 +190,19 @@ export const useUpdatePassword = () => {
     },
   });
 };
+
+export const useGetTransactions = (filters) => {
+  return useInfiniteQuery({
+    queryKey: ["getTransactions", filters],
+    queryFn: getTransactions,
+
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasMore ? lastPage.page + 1 : undefined
+    },
+
+    staleTime: 0
+  })
+}
 
 
 // user Hooks
