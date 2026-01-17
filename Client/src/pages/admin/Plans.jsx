@@ -12,7 +12,8 @@ const Plans = () => {
   const deletePlan = useDeletePlan();
 
   const handleDeletePlan = (planId) => {
-    if(confirm("Are you sure you want to Delete this Plan?")) deletePlan.mutate(planId);
+    if (confirm("Are you sure you want to Delete this Plan?"))
+      deletePlan.mutate(planId);
   };
 
   useEffect(() => {
@@ -61,7 +62,10 @@ const Plans = () => {
 
       <div className="flex flex-wrap gap-3 justify-center md:justify-start">
         {plans?.map((plan, key) => (
-          <div key={key} className="rounded-lg p-8 space-y-6 transition bg-white border border-gray-200 w-full max-w-[360px]">
+          <div
+            key={key}
+            className="rounded-lg p-8 space-y-6 transition bg-white border border-gray-200 w-full max-w-[360px]"
+          >
             <h3 className="text-2xl font-bold text-gray-900">
               {plan?.planName}
             </h3>
@@ -104,4 +108,4 @@ const Plans = () => {
   );
 };
 
-export default Plans
+export default Plans;

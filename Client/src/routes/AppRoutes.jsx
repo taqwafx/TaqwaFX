@@ -28,44 +28,48 @@ import "flowbite";
 import "flowbite-react";
 import Transactions from "../pages/admin/Transactions.jsx";
 import Provider from "../pages/admin/Provider.jsx";
+import ScrollToTop from "../components/ScrollToTop.jsx";
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/auth/login/" element={<Login />} />
+    <>
+      <ScrollToTop />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/auth/login/" element={<Login />} />
 
-      <Route element={<AppLayout />}>
-        {/* Admin Routes */}
-        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/investors" element={<Investors />} />
-          <Route path="/admin/investors/:investorId" element={<Investor />} />
-          <Route
-            path="/admin/investors/:investorId/investment/:investmentId"
-            element={<Investment />}
-          />
-          <Route path="/admin/plans" element={<Plans />} />
-          <Route path="/admin/transactions" element={<Transactions />} />
-          <Route path="/admin/providerflow" element={<Provider />} />
+        <Route element={<AppLayout />}>
+          {/* Admin Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/investors" element={<Investors />} />
+            <Route path="/admin/investors/:investorId" element={<Investor />} />
+            <Route
+              path="/admin/investors/:investorId/investment/:investmentId"
+              element={<Investment />}
+            />
+            <Route path="/admin/plans" element={<Plans />} />
+            <Route path="/admin/transactions" element={<Transactions />} />
+            <Route path="/admin/providerflow" element={<Provider />} />
+          </Route>
+
+          {/* User Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["investor"]} />}>
+            <Route path="/user/dashboard" element={<UserDashboard />} />
+            <Route path="/user/investments" element={<UserInvestments />} />
+            <Route
+              path="/user/investments/:investmentId"
+              element={<UserInvestment />}
+            />
+            <Route path="/user/plans" element={<UserPlans />} />
+          </Route>
         </Route>
 
-        {/* User Routes */}
-        <Route element={<ProtectedRoute allowedRoles={["investor"]} />}>
-          <Route path="/user/dashboard" element={<UserDashboard />} />
-          <Route path="/user/investments" element={<UserInvestments />} />
-          <Route
-            path="/user/investments/:investmentId"
-            element={<UserInvestment />}
-          />
-          <Route path="/user/plans" element={<UserPlans />} />
-        </Route>
-      </Route>
-
-      {/* Catch-all Route (optional) */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* Catch-all Route (optional) */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 };
 

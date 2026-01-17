@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetUserDashboard } from "../../hooks/appHook.js";
 import Loader from "../../components/Loader.jsx";
-import { formatRupee } from "../../utils/helper.js";
+import { formatDateToIST, formatRupee } from "../../utils/helper.js";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -189,7 +189,7 @@ const UserDashboard = () => {
                   Join Date:
                 </h3>
                 <p className="text-slate-600">
-                  {userDashboard?.investorDetails?.joinDate?.split("T")[0] || '-'}
+                  {formatDateToIST(userDashboard?.investorDetails?.joinDate) || '-'}
                 </p>
               </div>
 
@@ -264,7 +264,7 @@ const UserDashboard = () => {
                     <td className="px-6 py-4 font-medium">{inv?.investmentId}</td>
                     <td className="px-6 py-4 font-medium">{inv?.monthNo}</td>
                     <td className="px-6 py-4 font-medium">
-                      {inv?.returnDate?.split("T")[0] || '-'}
+                      {formatDateToIST(inv?.returnDat) || '-'}
                     </td>
                     <td className="px-6 py-4 font-medium">
                       {formatRupee(inv?.totalReturn)}
@@ -321,7 +321,7 @@ const UserDashboard = () => {
                   <td className="px-6 py-4 font-medium">{inv?.investmentId}</td>
                   <td className="px-6 py-4 font-medium">{inv?.monthNo}</td>
                   <td className="px-6 py-4 font-medium">
-                    {inv?.returnDate?.split("T")[0] || '-'}
+                    {formatDateToIST(inv?.returnDate) || '-'}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {formatRupee(inv?.totalReturn)}

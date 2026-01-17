@@ -87,17 +87,22 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
 
   // 7️⃣ Upcoming repayments (next 7 days)
   const today = new Date();
-  const next7Days = new Date(today);
-  next7Days.setDate(today.getDate() + 5);
+  const next5Days = new Date(today);
+  next5Days.setDate(today.getDate() + 5);
 
-  const upcomingRepaymentsRaw = await investmentModel.aggregate([
+  const upcomingRepayments = await investmentModel.aggregate([
     { $unwind: "$monthlyReturns" },
+
     {
       $match: {
-        "monthlyReturns.returnDate": { $gte: today, $lte: next7Days },
         "monthlyReturns.status": "pending",
+        $expr: {
+          $lte: ["$monthlyReturns.returnDate", next5Days],
+        },
       },
     },
+
+    // 🔹 Join User
     {
       $lookup: {
         from: "users",
@@ -107,6 +112,8 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
       },
     },
     { $unwind: "$user" },
+
+    // 🔹 Join Plan
     {
       $lookup: {
         from: "plans",
@@ -116,52 +123,38 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
       },
     },
     { $unwind: "$plan" },
+
     {
       $project: {
-        investmentId: "$investmentId",
+        _id: 0,
+
+        // Investor info
         investorId: "$user.userId",
         name: "$user.name",
-        joinDate: "$user.createdAt",
+
+        // Investment info
+        investmentId: "$investmentId",
         planType: "$plan.planName",
-        capital: "$capital",
+
+        // 🔥 Month-wise info
+        monthNo: "$monthlyReturns.monthNo",
+        monthlyProfit: "$monthlyReturns.totalReturn",
         repaymentDate: "$monthlyReturns.returnDate",
-        userId: "$user._id",
+
+        // 🔴 Overdue flag
+        isOverdue: {
+          $cond: [{ $lt: ["$monthlyReturns.returnDate", today] }, true, false],
+        },
       },
     },
+
+    { $sort: { repaymentDate: 1 } },
   ]);
 
-  // 8️⃣ Group repayments by investor for total fund and investment count
-  const investorMap = new Map();
-
-  for (const repay of upcomingRepaymentsRaw) {
-    const id = repay.userId.toString();
-    if (!investorMap.has(id)) {
-      investorMap.set(id, {
-        investmentId: repay.investmentId,
-        investorId: repay.investorId,
-        name: repay.name,
-        joinDate: repay.joinDate,
-        totalFund: 0,
-        totalInvestments: 0,
-        nextRepaymentDate: repay.repaymentDate,
-        planType: repay.planType,
-      });
-    }
-
-    const inv = investorMap.get(id);
-    inv.totalFund += repay.capital;
-    inv.totalInvestments += 1;
-
-    // update next repayment date if earlier one found
-    if (new Date(repay.repaymentDate) < new Date(inv.nextRepaymentDate)) {
-      inv.nextRepaymentDate = repay.repaymentDate;
-      inv.planType = repay.planType;
-    }
-  }
-
-  const upcomingRepayments = Array.from(investorMap.values()).sort(
-    (a, b) => new Date(a.nextRepaymentDate) - new Date(b.nextRepaymentDate)
-  );
+  // 8️⃣ get overdue repayments count
+  const overdueCount = upcomingRepayments.filter(
+    (item) => item.isOverdue === true
+  ).length;
 
   // 9️⃣ Final dashboard response
   const result = {
@@ -174,6 +167,7 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
     planWiseData,
     topInvestors,
     upcomingRepayments,
+    overdueCount
   };
 
   return res
@@ -184,9 +178,7 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
 });
 
 export const getInvestorDashboard = asyncHandler(async (req, res) => {
-  
   const { _id } = req.user;
-
 
   // 2️⃣ Find investor
   const investor = await userModel.findById(_id).lean();
@@ -309,7 +301,7 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
     totalInvestmentCapital,
     totalPaidTillDate,
     investedByPlan: investedByPlanArray,
-    clearMonths:firstFiveClearMonths,
+    clearMonths: firstFiveClearMonths,
     comingPayments,
   };
 

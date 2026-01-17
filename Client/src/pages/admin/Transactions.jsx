@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useGetTransactions } from "../../hooks/appHook";
 import Loader from "../../components/Loader";
-import { formatRupee } from "../../utils/helper";
+import { formatDateToIST, formatRupee } from "../../utils/helper";
 
 const Transactions = () => {
   const loadMoreRef = useRef(null);
@@ -10,10 +10,12 @@ const Transactions = () => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useGetTransactions(filters);
 
-  const transactions = data?.pages.flatMap((p) => p.data) ?? [];
+  const transactions =
+    data?.pages.flatMap((page) => page.data.transactions) || [];
+  const paidAMTSum = data?.pages?.[0]?.data?.paidAMTSum || 0;
 
   const onDateChange = (e) => {
-    setFilters({ date: e.target.value });
+    setFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   useEffect(() => {
@@ -38,13 +40,6 @@ const Transactions = () => {
 
     return () => observer.disconnect();
   }, [hasNextPage, fetchNextPage]);
-
-  if (isLoading)
-    return (
-      <div className=" w-full h-full flex justify-center items-center mt-[250px]">
-        <Loader />
-      </div>
-    );
 
   return (
     <main>
@@ -79,9 +74,18 @@ const Transactions = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-[#e5e7eb] mb-6">
           <h1 className="font-bold leading-7 text-xl">Transactions</h1>
 
-          <div className="relative max-w-min mt-2 md:mt-0">
+          <div className="relative max-w-min mt-2 md:mt-0 flex items-center gap-2">
             <input
               onChange={onDateChange}
+              name="fromDate"
+              type="date"
+              className="block w-full ps-6 pe-2  bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-md focus:ring-brand focus:border-brand  py-2.5 shadow-xs placeholder:text-body"
+              placeholder="Select date"
+            />
+            <span className=" whitespace-nowrap text-base">From - To</span>
+            <input
+              onChange={onDateChange}
+              name="toDate"
               type="date"
               className="block w-full ps-6 pe-2  bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-md focus:ring-brand focus:border-brand  py-2.5 shadow-xs placeholder:text-body"
               placeholder="Select date"
@@ -121,7 +125,10 @@ const Transactions = () => {
             </thead>
             <tbody>
               {transactions?.map((tran, key) => (
-                <tr key={key} className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <tr
+                  key={key}
+                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                >
                   <td className="px-6 py-4 font-medium whitespace-nowrap">
                     {tran?.user?.name}
                   </td>
@@ -133,11 +140,13 @@ const Transactions = () => {
                   </td>
                   <td className="px-6 py-4 font-medium">{tran?.paidMonthNo}</td>
                   <td className="px-6 py-4 font-medium">
-                    {tran?.returnDate?.split("T")[0] || "-"}
+                    {formatDateToIST(tran?.returnDate) || "-"}
                   </td>
-                  <td className="px-6 py-4 font-medium text-nowrap">{formatRupee(tran?.paidAMT)}</td>
                   <td className="px-6 py-4 font-medium text-nowrap">
-                    {tran?.paidAt?.split("T")[0] || "-"}
+                    {formatRupee(tran?.paidAMT)}
+                  </td>
+                  <td className="px-6 py-4 font-medium text-nowrap">
+                    {formatDateToIST(tran?.paidAt, true) || "-"}
                   </td>
                   <td className="px-6 py-4 font-medium text-nowrap">
                     {tran?.paymentType}
@@ -148,17 +157,24 @@ const Transactions = () => {
           </table>
         </div>
 
-        {isFetchingNextPage && (
+        {(isFetchingNextPage || isLoading) && (
           <div className="h-20 flex justify-center items-center relative">
             <Loader />
           </div>
         )}
 
-        {transactions.length < 1 && !isFetchingNextPage && (
+        {transactions.length < 1 && !isFetchingNextPage && !isLoading &&  (
           <div className="flex justify-center items-center relative pt-5 font-medium">
             You Didn’t make Any Transaction Ye't
           </div>
         )}
+      </div>
+
+      <div className=" fixed bottom-10 right-10 bg-white rounded-lg shadow py-2 px-3 border">
+        <span className=" font-medium m-1">
+          Total Paid :-{" "}
+          <span className=" text-blue-700">{formatRupee(paidAMTSum)}</span>
+        </span>
       </div>
 
       <div ref={loadMoreRef} />

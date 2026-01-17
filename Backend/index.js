@@ -30,6 +30,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cookieParser());
+app.use("/uploads", express.static("uploads"));
 
 // Import routes
 import userRouter from "./routes/user.routes.js";
@@ -55,11 +56,22 @@ if (fs.existsSync(clientDistPath)) {
     res.sendFile(path.join(clientDistPath, "index.html"));
   });
 } else {
-  console.log("⚠️  Vite dist folder not found. Run `npm run build` in /client first.");
+  console.log(
+    "⚠️  Vite dist folder not found. Run `npm run build` in /client first."
+  );
 }
 
 // Error handler
 app.use((err, req, res, next) => {
+  // 🔥 CLEANUP UPLOADED FILE IF ERROR OCCURRED
+  if (req.file) {
+    const filePath = req.file.path;
+
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  }
+
   const statusCode = err.statusCode || 500;
   return res.status(statusCode).json({
     success: false,

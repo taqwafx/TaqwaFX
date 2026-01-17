@@ -3,7 +3,7 @@ import DonutChart from "../../components/DonutChart.jsx";
 import { useNavigate } from "react-router-dom";
 import { useGetAdminDashboard } from "../../hooks/appHook.js";
 import Loader from "../../components/Loader.jsx";
-import { formatRupee } from "../../utils/helper.js";
+import { formatDateToIST, formatRupee } from "../../utils/helper.js";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -218,8 +218,13 @@ const AdminDashboard = () => {
       </div>
 
       <div className="bg-white rounded-lg p-6 border border-slate-200 shadow mt-3">
-        <h1 className=" mb-6 font-bold leading-7 text-xl pb-4 border-b border-[#e5e7eb]">
-          Comming Replayment Investors
+        <h1 className=" mb-6 font-bold leading-7 text-xl pb-4 border-b border-[#e5e7eb] relative">
+          Comming Replayment Investments
+          {adminDashboard?.overdueCount > 0 && (
+            <span className=" absolute right-0 top-0 text-base text-red-800">
+              {adminDashboard?.overdueCount} Overdue Payment
+            </span>
+          )}
         </h1>
 
         <div className="relative overflow-x-auto">
@@ -230,22 +235,22 @@ const AdminDashboard = () => {
                   Investor ID
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Name
+                  Investor
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Join Date
+                  Inv. ID
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Total Fund
+                  Plan
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Investments
+                  M.No
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Next Repayment Date
+                  Profit
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Repayment Plan
+                  Replayment Date
                 </th>
               </tr>
             </thead>
@@ -254,25 +259,27 @@ const AdminDashboard = () => {
                 <tr
                   key={index}
                   onClick={() =>
-                    navigate(`/admin/investors/${inv?.investorId}/investment/${inv?.investmentId}`)
+                    navigate(
+                      `/admin/investors/${inv?.investorId}/investment/${inv?.investmentId}`
+                    )
                   }
-                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                  className={`border-b cursor-pointer ${
+                    inv?.isOverdue
+                      ? "bg-red-100 text-red-800 border-gray-400"
+                      : "bg-white hover:bg-gray-50 border-gray-200"
+                  }`}
                 >
                   <td className="px-6 py-4 font-medium">{inv?.investorId}</td>
                   <td className="px-6 py-4 font-medium">{inv?.name}</td>
-                  <td className="px-6 py-4 font-medium">
-                    {inv?.joinDate?.split("T")[0] || "-"}
-                  </td>
-                  <td className="px-6 py-4 font-medium">
-                    {formatRupee(inv?.totalFund)}
-                  </td>
-                  <td className="px-6 py-4 font-medium">
-                    {inv?.totalInvestments}
-                  </td>
-                  <td className="px-6 py-4 font-medium">
-                    {inv?.nextRepaymentDate?.split("T")[0] || "-"}
-                  </td>
+                  <td className="px-6 py-4 font-medium">{inv?.investmentId}</td>
                   <td className="px-6 py-4 font-medium">{inv?.planType}</td>
+                  <td className="px-6 py-4 font-medium">{inv?.monthNo}</td>
+                  <td className="px-6 py-4 font-medium">
+                    {formatRupee(inv?.monthlyProfit)}
+                  </td>
+                  <td className="px-6 py-4 font-medium">
+                    {formatDateToIST(inv?.repaymentDate) || "-"}
+                  </td>
                 </tr>
               ))}
             </tbody>

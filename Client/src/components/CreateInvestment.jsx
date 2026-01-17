@@ -1,12 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useApp } from "../context/AppContext.jsx";
-import { useCreateInvestment } from "../hooks/appHook.js";
+import {
+  useCreateInvestment,
+  useGetInvestorInvBankDetails,
+} from "../hooks/appHook.js";
 import { calculateMonths, validateDateFormat } from "../utils/helper.js";
 import toast from "react-hot-toast";
 
 const CreateInvestment = ({ userId, refetch, setInvestor }) => {
   const [showModel, setShowModel] = useState(false);
+  const [investorInvAcDetails, setInvestorInvDetails] = useState([]);
+  const [AcSelectorValue, setAcSelectorValue] = useState("Select Ac. Details");
   const { plans } = useApp();
+  const fileInputRef = useRef();
+
+  const { data, isSuccess } = useGetInvestorInvBankDetails(userId);
+  useEffect(() => {
+    setInvestorInvDetails(data?.data);
+  }, [data, isSuccess]);
 
   const [formData, setFormData] = useState({
     userId,
@@ -22,6 +33,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
     bankHolderName: "",
     bankAcNumber: "",
     bankIFSCCode: "",
+    agreementFile: null,
   });
 
   const createInvestment = useCreateInvestment();
@@ -60,28 +72,35 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
 
   const handleBlur = () => {
     if (formData.startDate !== "") {
-      const formatted = validateDateFormat(formData.startDate);
-      if (!formatted) {
-        toast.error("Please enter a valid date (YYYY-MM-DD)");
-        setFormData((prev) => ({ ...prev, startDate: "" }));
-      } else {
-        const endDate = calculateMonths(
-          formData.startDate,
-          formData.totalMonths
-        );
-        setFormData((prev) => ({ ...prev, endDate }));
-      }
+      const endDate = calculateMonths(formData.startDate, formData.totalMonths);
+      setFormData((prev) => ({ ...prev, endDate }));
     }
   };
 
-  const handleBlurDepositDate = () => {
-    if (formData.depositDate !== "") {
-      if (!validateDateFormat(formData.depositDate)) {
-        toast.error("Please enter a valid date (YYYY-MM-DD)");
-        setFormData((prev) => ({ ...prev, depositDate: "" }));
-      }
+  useEffect(() => {
+    if (AcSelectorValue === "Menule Enter") {
+      setFormData((prev) => ({
+        ...prev,
+        bankName: "",
+        bankHolderName: "",
+        bankAcNumber: "",
+        bankIFSCCode: "",
+      }));
     }
-  };
+
+    if (AcSelectorValue.startsWith("INV")) {
+      const bankDetails = investorInvAcDetails.find(
+        (item) => item.investmentId === AcSelectorValue
+      );
+      setFormData((prev) => ({
+        ...prev,
+        bankName: bankDetails.bankName,
+        bankHolderName: bankDetails.bankHolderName,
+        bankAcNumber: bankDetails.bankAcNumber,
+        bankIFSCCode: bankDetails.bankIFSCCode,
+      }));
+    }
+  }, [AcSelectorValue]);
 
   useEffect(() => {
     if (formData.planId === "") {
@@ -115,6 +134,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
         bankHolderName: "",
         bankAcNumber: "",
         bankIFSCCode: "",
+        agreementFile: null,
       });
 
       refatchData();
@@ -130,17 +150,18 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
     setFormData({
       userId,
       planId: "",
-      capital: "",
-      returnROI: "",
+      capital: null,
+      returnROI: null,
       startDate: "",
       endDate: "",
       depositDate: "",
       depositType: "",
-      totalMonths: "",
+      totalMonths: null,
       bankName: "",
       bankHolderName: "",
       bankAcNumber: "",
       bankIFSCCode: "",
+      agreementFile: null,
     });
   }, [showModel]);
 
@@ -250,6 +271,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     type="text"
                     name="capital"
                     id="capital"
+                    placeholder="1,00,000"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                     value={formData.capital}
                     onChange={handleChange}
@@ -268,6 +290,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     type="text"
                     name="returnROI"
                     id="returnROI"
+                    placeholder="5, 6, more..."
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                     value={formData.returnROI}
                     onChange={handleChange}
@@ -286,6 +309,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     type="totalMonths"
                     name="price"
                     id="totalMonths"
+                    placeholder="10, 20 more..."
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                     readOnly
                     value={formData.totalMonths}
@@ -297,10 +321,10 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     for="startDate"
                     className="startDate mb-2 text-sm font-medium text-gray-900 "
                   >
-                    Start Date YYYY-MM-DD
+                    Start Date
                   </label>
                   <input
-                    type="text"
+                    type="date"
                     name="startDate"
                     id="startDate"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
@@ -322,6 +346,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     type="text"
                     name="endDate"
                     id="endDate"
+                    placeholder="MM/DD/YYYY"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                     value={formData.endDate}
                     readOnly
@@ -333,16 +358,15 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     for="depositDate"
                     className="startDate mb-2 text-sm font-medium text-gray-900 "
                   >
-                    Deposit On YYYY-MM-DD
+                    Deposit On
                   </label>
                   <input
-                    type="text"
+                    type="date"
                     name="depositDate"
                     id="depositDate"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                     value={formData.depositDate}
                     onChange={handleChange}
-                    onBlur={handleBlurDepositDate}
                     required
                   />
                 </div>
@@ -358,6 +382,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     type="text"
                     name="depositType"
                     id="depositType"
+                    placeholder="CASH, NEFT, UPI"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                     value={formData.depositType}
                     onChange={handleChange}
@@ -367,75 +392,157 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
 
                 <div className="col-span-2 sm:col-span-1">
                   <label
-                    for="bankName"
-                    className="block mb-2 text-sm font-medium text-gray-900"
+                    for="depositType"
+                    className="block mb-2 text-sm font-medium text-gray-900 "
                   >
-                    Bank Name
+                    Upload Aggrement
                   </label>
                   <input
-                    type="text"
-                    name="bankName"
-                    id="bankName"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                    value={formData.bankName}
-                    onChange={handleChange}
-                    required
+                    className="hidden"
+                    id="file_input"
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      setFormData((prev) => ({
+                        ...prev,
+                        agreementFile: file,
+                      }));
+                    }}
                   />
+
+                  <span
+                    onClick={() => fileInputRef?.current?.click()}
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm font-medium rounded-lg focus:ring-primary-600 focus:border-primary-600  w-full p-2.5 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {formData.agreementFile !== null ? (
+                      <span className=" truncate w-full">
+                        {formData.agreementFile?.name}
+                      </span>
+                    ) : (
+                      <>
+                        <svg
+                          className="w-6 h-6 text-blue-800"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M12 5v9m-5 0H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2M8 9l4-5 4 5m1 8h.01"
+                          />
+                        </svg>
+                        Upload
+                      </>
+                    )}
+                  </span>
                 </div>
 
                 <div className="col-span-2 sm:col-span-1">
                   <label
-                    for="bankHolderName"
-                    className="block mb-2 text-sm font-medium text-gray-900"
+                    for="planId"
+                    className="block mb-2 text-sm font-medium text-gray-900 "
                   >
-                    Bank Holder Name
+                    Ac. Details
                   </label>
-                  <input
-                    type="text"
-                    name="bankHolderName"
-                    id="bankHolderName"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                    value={formData.bankHolderName}
-                    onChange={handleChange}
+                  <select
                     required
-                  />
+                    id="planId"
+                    name="planId"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 "
+                    value={AcSelectorValue}
+                    onChange={(e) => setAcSelectorValue(e.target.value)}
+                  >
+                    <option selected value="">
+                      Select Ac. Details
+                    </option>
+                    <option value="Menule Enter">Menule Enter</option>
+                    {investorInvAcDetails?.map((invDetail, index) => (
+                      <option key={index} value={invDetail?.investmentId}>
+                        {invDetail.investmentId}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                <div className="col-span-2 sm:col-span-1">
-                  <label
-                    for="bankAcNumber"
-                    className="block mb-2 text-sm font-medium text-gray-900"
-                  >
-                    Account Number
-                  </label>
-                  <input
-                    type="text"
-                    name="bankAcNumber"
-                    id="bankAcNumber"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                    value={formData.bankAcNumber}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="col-span-2 sm:col-span-1">
-                  <label
-                    for="bankIFSCCode"
-                    className="block mb-2 text-sm font-medium text-gray-900"
-                  >
-                    IFSC Code
-                  </label>
-                  <input
-                    type="text"
-                    name="bankIFSCCode"
-                    id="bankIFSCCode"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                    value={formData.bankIFSCCode}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+                {AcSelectorValue === "Menule Enter" && (
+                <>
+                  <div className="col-span-2 sm:col-span-1">
+                    <label
+                      for="bankName"
+                      className="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                      Bank Name
+                    </label>
+                    <input
+                      type="text"
+                      name="bankName"
+                      id="bankName"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      value={formData.bankName}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <label
+                      for="bankHolderName"
+                      className="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                      Bank Holder Name
+                    </label>
+                    <input
+                      type="text"
+                      name="bankHolderName"
+                      id="bankHolderName"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      value={formData.bankHolderName}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <label
+                      for="bankAcNumber"
+                      className="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                      Account Number
+                    </label>
+                    <input
+                      type="text"
+                      name="bankAcNumber"
+                      id="bankAcNumber"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      value={formData.bankAcNumber}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <label
+                      for="bankIFSCCode"
+                      className="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                      IFSC Code
+                    </label>
+                    <input
+                      type="text"
+                      name="bankIFSCCode"
+                      id="bankIFSCCode"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      value={formData.bankIFSCCode}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </>
+                )}
               </div>
 
               <button

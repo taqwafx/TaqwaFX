@@ -4,12 +4,12 @@ import { useGetInvestors } from "../../hooks/appHook.js";
 import { useApp } from "../../context/AppContext";
 import CreateInvestor from "../../components/CreateInvestor.jsx";
 import Loader from "../../components/Loader.jsx";
-import { formatRupee } from "../../utils/helper.js";
+import { formatDateToIST, formatRupee } from "../../utils/helper.js";
 
 const Investors = () => {
+  const loadMoreRef = useRef(null);
   const navigate = useNavigate();
-  const { investors, setInvestors, plans } = useApp();
-
+  const { plans } = useApp();
   const [filters, setFilters] = useState({
     search: "",
     status: "",
@@ -23,43 +23,43 @@ const Investors = () => {
     sort: "createdAt:desc",
   });
 
-  const { data, isLoading, isFetching, refetch } = useGetInvestors(filters);
- 
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    refetch,
+  } = useGetInvestors(filters);
+
+  const investors = data?.pages.flatMap((page) => page.data.investors) || [];
+
   const handleChange = (e) => {
     setFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   useEffect(() => {
-    if (data?.data?.investors) {
-      setInvestors(
-        (prev) =>
-          filters.page === 1
-            ? data.data.investors // fresh list
-            : [...prev, ...data.data.investors] // append next page
-      );
-    }
-  }, [data]);
+    if (!hasNextPage) return;
 
-  // ✅ Infinite scroll
-  const loaderRef = useRef(null);
-  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isFetching) {
-          const total = data?.data?.pagination?.total || 0;
-          const totalPages = Math.ceil(total / filters.limit);
-          if (filters.page < totalPages) {
-            setFilters((prev) => ({ ...prev, page: prev.page + 1 }));
-          }
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
         }
       },
-      { threshold: 1 }
+      {
+        root: null, // 👈 body / window
+        rootMargin: "100px",
+        threshold: 0,
+      }
     );
 
-    if (loaderRef.current) observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [data, isFetching, filters]);
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
 
+    return () => observer.disconnect();
+  }, [hasNextPage, fetchNextPage]);
 
   return (
     <main>
@@ -122,7 +122,7 @@ const Investors = () => {
               required
               value={filters.search}
               onChange={handleChange}
-              onBlur={()=>setFilters((prev) => ({...prev, search: ""}))}
+              onBlur={() => setFilters((prev) => ({ ...prev, search: "" }))}
             />
           </div>
         </form>
@@ -135,7 +135,9 @@ const Investors = () => {
             name="status"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5  w-full"
           >
-            <option selected value="">INV Status</option>
+            <option selected value="">
+              INV Status
+            </option>
             <option value="Active">Active</option>
             <option value="Complete">Complete</option>
           </select>
@@ -162,7 +164,9 @@ const Investors = () => {
             name="repaymentDate"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 w-full"
           >
-            <option selected value="">Reapayment Date</option>
+            <option selected value="">
+              Reapayment Date
+            </option>
             <option value="5">5th</option>
             <option value="10">10th</option>
             <option value="15">15th</option>
@@ -248,7 +252,7 @@ const Investors = () => {
                     </td>
                     <td className="px-6 py-4 font-medium">{investor?.name}</td>
                     <td className="px-6 py-4 font-medium">
-                      {investor?.joinDate?.split("T")[0] || '-'}
+                      {formatDateToIST(investor?.joinDate) || "-"}
                     </td>
                     <td className="px-6 py-4 font-medium">
                       {formatRupee(investor?.totalCapital)}
@@ -258,7 +262,7 @@ const Investors = () => {
                     </td>
                     <td className="px-6 py-4 font-medium">
                       {investor?.nextRepaymentDate
-                        ? investor?.nextRepaymentDate?.split("T")[0]
+                        ? formatDateToIST(investor?.nextRepaymentDate)
                         : "-"}
                     </td>
                     <td className="px-6 py-4 font-medium">
@@ -279,20 +283,25 @@ const Investors = () => {
           </table>
 
           {/* 🔹 Loader for scroll */}
-          <div ref={loaderRef}>
-            {isFetching || isLoading && (
-              <div className="h-20 flex justify-center items-center relative">
-                <Loader />
-              </div>
-            )}
-          </div>
+
+          {(isFetchingNextPage || isLoading) && (
+            <div className="h-20 flex justify-center items-center relative">
+              <Loader />
+            </div>
+          )}
+
+          {investors.length < 1 && !isFetchingNextPage && !isLoading && (
+            <div className="flex justify-center items-center relative pt-5 font-medium">
+              No Investor Found!
+            </div>
+          )}
         </div>
       </div>
 
+      <div ref={loadMoreRef} />
       <CreateInvestor refetch={refetch} />
     </main>
   );
 };
 
-
-export default Investors
+export default Investors;

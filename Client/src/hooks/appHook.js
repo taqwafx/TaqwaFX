@@ -7,6 +7,7 @@ import {
   getAdminDashboard,
   getInvestmentById,
   getInvestorById,
+  getInvestorInvBankDetails,
   getInvestorInvestments,
   getInvestors,
   getPlan,
@@ -76,10 +77,15 @@ export const useLogOut = () => {
 };
 
 export const useGetInvestors = (filters) => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["investors", filters],
-    queryFn: () => getInvestors(filters),
-    keepPreviousData: true,
+    queryFn: getInvestors,
+
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+
     staleTime: 0,
   });
 };
@@ -120,6 +126,14 @@ export const useGetInvestmentDetails = (investmentId) => {
     queryKey: ["investment", investmentId], // unique cache key per investor
     queryFn: () => getInvestmentById(investmentId),
     enabled: true, // only fetch if id exists
+    staleTime: 0,
+  });
+};
+
+export const useGetInvestorInvBankDetails = (investmentId) => {
+  return useQuery({
+    queryKey: ["getInvestorInvBankDetails" , investmentId],
+    queryFn: () => getInvestorInvBankDetails(investmentId),
     staleTime: 0,
   });
 };
@@ -197,13 +211,13 @@ export const useGetTransactions = (filters) => {
     queryFn: getTransactions,
 
     getNextPageParam: (lastPage) => {
-      return lastPage.hasMore ? lastPage.page + 1 : undefined
+      const { page, hasMore } = lastPage.data.pagination;
+      return hasMore ? page + 1 : undefined;
     },
 
-    staleTime: 0
-  })
-}
-
+    staleTime: 0,
+  });
+};
 
 // user Hooks
 export const useGetUserDashboard = () => {

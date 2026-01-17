@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useGetInvestorDetails, useUpdatePassword } from "../../hooks/appHook.js";
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader.jsx";
-import { addMonthsSafe, formatRupee } from "../../utils/helper.js";
+import { addMonthsSafe, formatDateToIST, formatRupee } from "../../utils/helper.js";
 import CreateInvestment from "../../components/CreateInvestment.jsx";
 import { strongPasswordRegex } from "../../utils/validations.js";
 
@@ -180,7 +180,7 @@ const Investor = () => {
                   Join Date:
                 </h3>
                 <p className="text-slate-600">
-                  {investor?.joinDate?.split("T")[0] || '-'}
+                  {formatDateToIST(investor?.joinDate) || '-'}
                 </p>
               </div>
 
@@ -424,13 +424,14 @@ const Investor = () => {
                   <td className="px-6 py-4 font-medium">{inv?.planType}</td>
                   <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
                   <td className="px-6 py-4 font-medium">
-                    {addMonthsSafe(inv?.startDate, 1)?.toISOString()?.split("T")[0] || '-'}
+                    {/* {addMonthsSafe(inv?.startDate, 1)?.toISOString()?.split("T")[0] || '-'} */}
+                    {formatDateToIST(addMonthsSafe(inv?.startDate, 1)) || '-'}
                   </td>
                   <td className="px-6 py-4 font-medium">
-                    {inv?.endDate?.split("T")[0] || '-'}
+                    {formatDateToIST(inv?.endDate) || '-'}
                   </td>
                   <td className="px-6 py-4 font-medium">
-                    {inv?.repaymentDate?.split("T")[0] || '-'}
+                    {formatDateToIST(inv?.repaymentDate) || '-'}
                   </td>
                   <td className="px-6 py-4 font-medium">{inv?.completedMonths}</td>
                   <td className="px-6 py-4 font-medium">

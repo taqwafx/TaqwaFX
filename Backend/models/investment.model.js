@@ -38,12 +38,16 @@ const investmentSchema = new mongoose.Schema({
   TotalPaidTillDate: { type: Number },
   durationMonths: { type: Number, required: true },
   depositDate: { type: Date },
-  depositType: {type: String, required: true},
-  bankName: {type: String, required: true},
-  bankHolderName: {type: String, required: true},
+  depositType: { type: String, required: true },
+  bankName: { type: String, required: true },
+  bankHolderName: { type: String, required: true },
   bankAcNumber: { type: Number, required: true },
-  bankIFSCCode: {type: String, required: true},
+  bankIFSCCode: { type: String, required: true },
   monthlyReturns: [monthSchema],
+  agreementPath: {
+    type: String,
+    required: true,
+  },
 });
 
 export const investmentModel = mongoose.model("Investment", investmentSchema);

@@ -8,6 +8,8 @@ import { addMonthsSafe } from "../utils/helper.js";
 import mongoose from "mongoose";
 import { sendSMS } from "../services/sms.js";
 import { TransactionModel } from "../models/Transactions.model.js";
+import fs from "fs";
+import path from "path";
 
 // Create Investment
 export const createInvestment = asyncHandler(async (req, res) => {
@@ -31,6 +33,13 @@ export const createInvestment = asyncHandler(async (req, res) => {
 
   if (!capital || !planId || !returnROI) {
     throw new ApiError(400, "all fileds are required");
+  }
+
+  // uploaded file
+  const agreementFile = req.file;
+
+  if (!agreementFile) {
+    throw new ApiError(400, "Investment agreement is required");
   }
 
   const user = await userModel.find({ userId });
@@ -117,10 +126,10 @@ export const createInvestment = asyncHandler(async (req, res) => {
     : monthlyProfit * plan.durationMonths + Number(capital);
 
   // generate investmentId (you can swap to your ID generator)
-  const investorIdNumb = userId?.replace("TFX", "");
+  const investorIdNumb = userId?.replace("TFX", ""); //5001
   const lastInvestment = await investmentModel.aggregate([
     {
-      $match: { userId: "TFX5001" },
+      $match: { userId },
     },
     {
       $addFields: {
@@ -139,7 +148,26 @@ export const createInvestment = asyncHandler(async (req, res) => {
     },
   ]);
 
-  const investmentId = `INV${investorIdNumb}-${lastInvestment[0]?.investmentNumber + 1}`;
+  const nextInvestmentCount =
+    lastInvestment.length <= 0
+      ? 1
+      : Number(lastInvestment[0]?.investmentNumber) + 1;
+  const investmentId = `INV${investorIdNumb}-${nextInvestmentCount}`;
+
+  // 🔁 RENAME AFREEMENT FILE AFTER INV ID EXISTS
+  const oldPath = agreementFile.path;
+  const ext = path.extname(oldPath);
+
+  const newFileName = `agreement-${investmentId}-${Date.now()}${ext}`;
+  const diskPath = path.join(
+    process.cwd(),
+    "uploads",
+    "Inv.Aggrements",
+    newFileName
+  );
+
+  const urlPath = `uploads/Inv.Aggrements/${newFileName}`;
+  fs.renameSync(oldPath, diskPath);
 
   const investment = await investmentModel.create({
     user: user[0]?._id,
@@ -164,6 +192,7 @@ export const createInvestment = asyncHandler(async (req, res) => {
     bankAcNumber,
     bankIFSCCode,
     monthlyReturns,
+    agreementPath: `${process.env.APP_URL}/${urlPath}`,
   });
 
   const startOn = addMonthsSafe(sDate, 1)?.toISOString()?.split("T")[0];
@@ -224,6 +253,7 @@ export const getInvestmentDetails = asyncHandler(async (req, res) => {
     bankAcNumber: investment.bankAcNumber,
     bankIFSCCode: investment.bankIFSCCode,
     monthlyReturns: investment.monthlyReturns || [],
+    agreementPath: investment.agreementPath,
   };
 
   return res
@@ -403,4 +433,25 @@ export const getInvestorInvestments = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, formatted, "Investments fetched successfully"));
+});
+
+export const getInvestorInvAcDetails = asyncHandler(async (req, res) => {
+  const { userId } = req.params; 
+
+  // 1️⃣ Find all investments of that user
+  const investments = await investmentModel.find({ userId });
+
+  // 2️⃣ Convert to ARRAY
+  const InvBankDetails = investments.map((inv) => ({
+    investmentId: inv.investmentId,
+    bankName: inv.bankName,
+    bankHolderName: inv.bankHolderName,
+    bankAcNumber: inv.bankAcNumber,
+    bankIFSCCode: inv.bankIFSCCode,
+  }));
+
+  // 3️⃣ Send response
+  return res
+    .status(200)
+    .json(new ApiResponse(200, InvBankDetails, "Investor Inv Ac Details fetched successfully"));
 });

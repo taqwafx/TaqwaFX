@@ -27,7 +27,7 @@ export function validateDateFormat(dateStr) {
 
 export function validateMonth(userDateStr) {
   // Expecting format YYYY/MM/DD
-  const [year, month, day] = userDateStr.split('-').map(Number);
+  const [year, month, day] = userDateStr.split("-").map(Number);
 
   // Get current month (0-based → add 1)
   const currentMonth = new Date().getMonth() + 1;
@@ -55,7 +55,7 @@ export function calculateMonths(startDateStr, totalMonths) {
   const resultMonth = String(date.getMonth() + 1).padStart(2, "0");
   const resultYear = date.getFullYear();
 
-  return `${resultYear}-${resultMonth}-${resultDay}`;
+  return `${resultMonth}/${resultDay}/${resultYear}`;
 }
 
 export const addMonthsSafe = (date, months) => {
@@ -68,4 +68,47 @@ export const addMonthsSafe = (date, months) => {
     d.setDate(0);
   }
   return d;
+};
+
+export const formatDateToIST = (dateInput, withTime = false) => {
+  const date = new Date(dateInput);
+
+  const datePart = date
+    .toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
+    .replaceAll("/", "-");
+
+  if (!withTime) return datePart;
+
+  const timePart = date.toLocaleTimeString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return `${datePart}, ${timePart}`;
+};
+
+export const downloadAgreement = async (agreementUrl) => {
+  const res = await fetch(agreementUrl);
+  const blob = await res.blob();
+
+  // ✅ extract actual filename from URL
+  const fileName = agreementUrl.split("/").pop();
+
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = fileName; // REAL filename
+  document.body.appendChild(a);
+  a.click();
+
+  a.remove();
+  window.URL.revokeObjectURL(url);
 };
