@@ -46,7 +46,6 @@ const investmentSchema = new mongoose.Schema({
   monthlyReturns: [monthSchema],
   agreementPath: {
     type: String,
-    required: true,
   },
 });
 

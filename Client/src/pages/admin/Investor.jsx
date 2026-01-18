@@ -1,14 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useGetInvestorDetails, useUpdatePassword } from "../../hooks/appHook.js";
+import {
+  useGetInvestorDetails,
+  useUpdatePassword,
+} from "../../hooks/appHook.js";
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader.jsx";
-import { addMonthsSafe, formatDateToIST, formatRupee } from "../../utils/helper.js";
+import {
+  addMonthsSafe,
+  formatDateToIST,
+  formatRupee,
+} from "../../utils/helper.js";
 import CreateInvestment from "../../components/CreateInvestment.jsx";
 import { strongPasswordRegex } from "../../utils/validations.js";
 
 const Investor = () => {
   const [investor, setInvestor] = useState({});
+  const [investments, setInvestments] = useState([]);
   const [changePassword, setChangePassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -36,13 +44,12 @@ const Investor = () => {
     e.preventDefault();
 
     const title = updatePassBtnRef?.current?.innerText;
-    if(title === "Cancle") return setChangePassword(false);
-    
+    if (title === "Cancle") return setChangePassword(false);
 
     if (formData.newPassword !== investor?.loginDetails?.password) {
       if (strongPasswordRegex.test(formData.password)) {
         toast.error(
-          "Password must have 8+ chars, 1 uppercase, 1 lowercase, 1 number & 1 special symbol."
+          "Password must have 8+ chars, 1 uppercase, 1 lowercase, 1 number & 1 special symbol.",
         );
       } else {
         updatePassword.mutate(formData);
@@ -56,6 +63,31 @@ const Investor = () => {
     }
   };
 
+const onFilterDateChange = (e) => {
+  const value = e.target.value;
+
+  // 🔁 Clear filter → show all investments
+  if (!value) {
+    setInvestments(data?.data?.investments);
+    return;
+  }
+
+  const selected = new Date(value);
+  selected.setHours(0, 0, 0, 0);
+
+  const filtered = data?.data?.investments?.filter((inv) => {
+    if (!inv.repaymentDate) return false;
+
+    const created = new Date(inv.repaymentDate);
+    created.setHours(0, 0, 0, 0);
+
+    return created.getTime() === selected.getTime();
+  });
+
+  setInvestments(filtered);
+};
+
+
   useEffect(() => {
     setFormData({
       investorId: investor?.investorId,
@@ -65,6 +97,7 @@ const Investor = () => {
 
   useEffect(() => {
     setInvestor(data?.data);
+    setInvestments(data?.data?.investments);
   }, [isSuccess]);
 
   useEffect(() => {
@@ -180,7 +213,7 @@ const Investor = () => {
                   Join Date:
                 </h3>
                 <p className="text-slate-600">
-                  {formatDateToIST(investor?.joinDate) || '-'}
+                  {formatDateToIST(investor?.joinDate) || "-"}
                 </p>
               </div>
 
@@ -264,10 +297,10 @@ const Investor = () => {
               {updatePassword?.isPending
                 ? "Updating..."
                 : formData.newPassword !== investor?.loginDetails?.password
-                ? "Update Password"
-                : changePassword
-                ? "Cancle"
-                : "Change Password"}
+                  ? "Update Password"
+                  : changePassword
+                    ? "Cancle"
+                    : "Change Password"}
             </button>
           </div>
         </div>
@@ -319,9 +352,9 @@ const Investor = () => {
                 >
                   <path
                     stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M3 15v4m6-6v6m6-4v4m6-6v6M3 11l6-5 6 5 5.5-5.5"
                   />
                 </svg>
@@ -369,9 +402,19 @@ const Investor = () => {
       </div>
 
       <div className="bg-white rounded-lg p-6 border border-slate-200 shadow mt-3">
-        <h1 className=" mb-6 font-bold leading-7 text-xl pb-4 border-b border-[#e5e7eb]">
-          Investments
-        </h1>
+        <div className="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-[#e5e7eb] mb-6">
+          <h1 className="font-bold leading-7 text-xl">Investments</h1>
+
+          <div className="relative max-w-min mt-2 md:mt-0 flex items-center gap-2">
+            <input
+              onChange={onFilterDateChange}
+              name="toDate"
+              type="date"
+              className="block w-full ps-6 pe-2  bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-md focus:ring-brand focus:border-brand  py-2.5 shadow-xs placeholder:text-body"
+              placeholder="Select date"
+            />
+          </div>
+        </div>
 
         <div className="relative overflow-x-auto">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 bg-green-400">
@@ -407,12 +450,12 @@ const Investor = () => {
               </tr>
             </thead>
             <tbody>
-              {investor?.investments?.map((inv, index) => (
+              {investments?.map((inv, index) => (
                 <tr
                   key={index}
                   onClick={() =>
                     navigate(
-                      `/admin/investors/${investor?.investorId}/investment/${inv?.investmentId}`
+                      `/admin/investors/${investor?.investorId}/investment/${inv?.investmentId}`,
                     )
                   }
                   className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
@@ -425,15 +468,17 @@ const Investor = () => {
                   <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
                   <td className="px-6 py-4 font-medium">
                     {/* {addMonthsSafe(inv?.startDate, 1)?.toISOString()?.split("T")[0] || '-'} */}
-                    {formatDateToIST(addMonthsSafe(inv?.startDate, 1)) || '-'}
+                    {formatDateToIST(addMonthsSafe(inv?.startDate, 1)) || "-"}
                   </td>
                   <td className="px-6 py-4 font-medium">
-                    {formatDateToIST(inv?.endDate) || '-'}
+                    {formatDateToIST(inv?.endDate) || "-"}
                   </td>
                   <td className="px-6 py-4 font-medium">
-                    {formatDateToIST(inv?.repaymentDate) || '-'}
+                    {formatDateToIST(inv?.repaymentDate) || "-"}
                   </td>
-                  <td className="px-6 py-4 font-medium">{inv?.completedMonths}</td>
+                  <td className="px-6 py-4 font-medium">
+                    {inv?.completedMonths}
+                  </td>
                   <td className="px-6 py-4 font-medium">
                     <span className="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm">
                       {inv?.status}
@@ -455,5 +500,4 @@ const Investor = () => {
   );
 };
 
-
-export default Investor
+export default Investor;

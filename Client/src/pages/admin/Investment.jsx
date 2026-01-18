@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useGetInvestmentDetails } from "../../hooks/appHook.js";
+import {
+  useGetInvestmentDetails,
+  useUploadInvAgreement,
+} from "../../hooks/appHook.js";
 import Loader from "../../components/Loader.jsx";
 import toast from "react-hot-toast";
 import {
-  addMonthsSafe,
   downloadAgreement,
   formatDateToIST,
   formatRupee,
@@ -15,7 +17,7 @@ const Investment = () => {
   const [investment, setInvestment] = useState({});
   const [showAlertModel, setShowAlertModel] = useState(false);
   const [showModel, setShowModel] = useState(false);
-
+  const fileInputRef = useRef();
   const { investmentId } = useParams();
 
   const [repaymentData, setRepaymentData] = useState({
@@ -39,6 +41,38 @@ const Investment = () => {
       });
     } else toast.error("You Can't Change it!");
   };
+
+  const {
+    mutate: uploadAgreement,
+    data: uploadData,
+    isPending: isUploading,
+    isSuccess: isuploadSuccess,
+    isError: isuploadError,
+    isLoading: isuploadLoading,
+  } = useUploadInvAgreement();
+
+  const handleDownloadAgreement = () => {
+    if (investment?.agreementPath) {
+      downloadAgreement(investment?.agreementPath);
+    } else {
+      fileInputRef?.current?.click();
+    }
+  };
+
+  const handleAgreementInputChange = (e) => {
+    const file = e.target.files[0];
+    uploadAgreement({ agreementFile: file, investmentId });
+  };
+
+  useEffect(() => {
+    if (uploadData) {
+      toast.success(uploadData?.message);
+      setInvestment((prev) => ({
+        ...prev,
+        agreementPath: uploadData?.data?.agreementURL,
+      }));
+    }
+  }, [isuploadError, isuploadSuccess, uploadData]);
 
   useEffect(() => {
     setInvestment(data?.data);
@@ -140,23 +174,7 @@ const Investment = () => {
               onClick={() => setShowAlertModel(true)}
               className="cursor-pointer font-semibold"
             >
-              <svg
-                class="w-6 h-6 text-gray-800 hover:text-blue-700"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"
-                />
-              </svg>
+              Depost & Bank Details
             </span>
           </div>
 
@@ -223,29 +241,24 @@ const Investment = () => {
               Investment Analytics
             </h1>
             <span
-              onClick={() => downloadAgreement(investment?.agreementPath)}
+              onClick={handleDownloadAgreement}
               className="cursor-pointer font-semibold"
             >
-              <svg
-                class="w-6 h-6 text-gray-800 hover:text-blue-700"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M13 11.15V4a1 1 0 1 0-2 0v7.15L8.78 8.374a1 1 0 1 0-1.56 1.25l4 5a1 1 0 0 0 1.56 0l4-5a1 1 0 1 0-1.56-1.25L13 11.15Z"
-                  clip-rule="evenodd"
-                />
-                <path
-                  fill-rule="evenodd"
-                  d="M9.657 15.874 7.358 13H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-2.358l-2.3 2.874a3 3 0 0 1-4.685 0ZM17 16a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H17Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
+              <input
+                className="hidden"
+                id="file_input"
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAgreementInputChange}
+              />
+
+              {isUploading || isuploadLoading ? (
+                <div className="w-[24px] h-[24px] mt-[-10px] mr-[5px]">
+                  <Loader />
+                </div>
+              ) : (
+               "Download Agreement"
+              )}
             </span>
           </div>
 
@@ -385,7 +398,7 @@ const Investment = () => {
                           investmentId,
                           month?.monthNo,
                           month?.totalReturn,
-                          formatDateToIST(month?.returnDate) || "-"
+                          formatDateToIST(month?.returnDate) || "-",
                         )
                       }
                       className={`${

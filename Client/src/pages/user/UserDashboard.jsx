@@ -264,7 +264,7 @@ const UserDashboard = () => {
                     <td className="px-6 py-4 font-medium">{inv?.investmentId}</td>
                     <td className="px-6 py-4 font-medium">{inv?.monthNo}</td>
                     <td className="px-6 py-4 font-medium">
-                      {formatDateToIST(inv?.returnDat) || '-'}
+                      {formatDateToIST(inv?.returnDate) || '-'}
                     </td>
                     <td className="px-6 py-4 font-medium">
                       {formatRupee(inv?.totalReturn)}

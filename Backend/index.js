@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import fs from "fs";
 import { connectDB } from "./db/db.js";
+// import cloudinary from "./services/cloudinary.js";
 
 // Load environment variables
 dotenv.config();

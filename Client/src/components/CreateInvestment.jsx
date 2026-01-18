@@ -63,6 +63,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if(AcSelectorValue === "Select Ac. Details") return toast.error("Please Select Ac. Details");
     createInvestment.mutate(formData);
   };
 
@@ -150,19 +151,20 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
     setFormData({
       userId,
       planId: "",
-      capital: null,
-      returnROI: null,
+      capital: "",
+      returnROI: "",
       startDate: "",
       endDate: "",
       depositDate: "",
       depositType: "",
-      totalMonths: null,
+      totalMonths: "",
       bankName: "",
       bankHolderName: "",
       bankAcNumber: "",
       bankIFSCCode: "",
-      agreementFile: null,
+      agreementFile: null
     });
+    setAcSelectorValue("Select Ac. Details")
   }, [showModel]);
 
   return (
@@ -415,7 +417,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     onClick={() => fileInputRef?.current?.click()}
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm font-medium rounded-lg focus:ring-primary-600 focus:border-primary-600  w-full p-2.5 flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    {formData.agreementFile !== null ? (
+                    {formData.agreementFile ? (
                       <span className=" truncate w-full">
                         {formData.agreementFile?.name}
                       </span>
@@ -459,7 +461,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                     value={AcSelectorValue}
                     onChange={(e) => setAcSelectorValue(e.target.value)}
                   >
-                    <option selected value="">
+                    <option selected value="Select Ac. Details">
                       Select Ac. Details
                     </option>
                     <option value="Menule Enter">Menule Enter</option>
@@ -471,7 +473,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                   </select>
                 </div>
 
-                {AcSelectorValue === "Menule Enter" && (
+                {AcSelectorValue !== "Select Ac. Details" && (
                 <>
                   <div className="col-span-2 sm:col-span-1">
                     <label

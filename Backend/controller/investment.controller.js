@@ -8,8 +8,7 @@ import { addMonthsSafe } from "../utils/helper.js";
 import mongoose from "mongoose";
 import { sendSMS } from "../services/sms.js";
 import { TransactionModel } from "../models/Transactions.model.js";
-import fs from "fs";
-import path from "path";
+import { uploadFileToCloudinary } from "../services/upload.service.js";
 
 // Create Investment
 export const createInvestment = asyncHandler(async (req, res) => {
@@ -33,13 +32,6 @@ export const createInvestment = asyncHandler(async (req, res) => {
 
   if (!capital || !planId || !returnROI) {
     throw new ApiError(400, "all fileds are required");
-  }
-
-  // uploaded file
-  const agreementFile = req.file;
-
-  if (!agreementFile) {
-    throw new ApiError(400, "Investment agreement is required");
   }
 
   const user = await userModel.find({ userId });
@@ -154,20 +146,11 @@ export const createInvestment = asyncHandler(async (req, res) => {
       : Number(lastInvestment[0]?.investmentNumber) + 1;
   const investmentId = `INV${investorIdNumb}-${nextInvestmentCount}`;
 
-  // 🔁 RENAME AFREEMENT FILE AFTER INV ID EXISTS
-  const oldPath = agreementFile.path;
-  const ext = path.extname(oldPath);
+  // GET AFREEMENT FILE AND UPLOAD IT IN CLOUDINARY IF EXITS AFTER INV ID EXISTS
+  const agreementFile = req.file;
+  const newFileName = `TaqwaFX-Agreement-${investmentId}--${Date.now()}`;
 
-  const newFileName = `agreement-${investmentId}-${Date.now()}${ext}`;
-  const diskPath = path.join(
-    process.cwd(),
-    "uploads",
-    "Inv.Aggrements",
-    newFileName
-  );
-
-  const urlPath = `uploads/Inv.Aggrements/${newFileName}`;
-  fs.renameSync(oldPath, diskPath);
+  const agreementURL = await uploadFileToCloudinary(agreementFile, newFileName);
 
   const investment = await investmentModel.create({
     user: user[0]?._id,
@@ -192,14 +175,14 @@ export const createInvestment = asyncHandler(async (req, res) => {
     bankAcNumber,
     bankIFSCCode,
     monthlyReturns,
-    agreementPath: `${process.env.APP_URL}/${urlPath}`,
+    agreementPath: agreementURL,
   });
 
   const startOn = addMonthsSafe(sDate, 1)?.toISOString()?.split("T")[0];
 
   await sendSMS(
     `+91${user[0]?.phone}`,
-    `TaqwaFX: ${user[0]?.name}, Invest Rs.${capital} in Plan ${plan?.planName} is active. 1st Payment Date: ${startOn} ID: INV5012-1. Details: ${process.env.APP_LOGIN_SHORT_LINK}`
+    `TaqwaFX: ${user[0]?.name}, Invest Rs.${capital} in Plan ${plan?.planName} is active. 1st Payment Date: ${startOn} ID: ${investmentId}. Details: ${process.env.APP_LOGIN_SHORT_LINK}`,
   );
 
   return res
@@ -259,7 +242,11 @@ export const getInvestmentDetails = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, formatted, "Investment details fetched successfully")
+      new ApiResponse(
+        200,
+        formatted,
+        "Investment details fetched successfully",
+      ),
     );
 });
 
@@ -283,7 +270,7 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
   const user = await userModel.findById(investment.user);
 
   const monthIndex = investment.monthlyReturns.findIndex(
-    (m) => m.monthNo === +monthNo
+    (m) => m.monthNo === +monthNo,
   );
   if (monthIndex === -1)
     throw new ApiError(404, "Month not found for this investment");
@@ -295,7 +282,7 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
   if (unpaidBefore) {
     throw new ApiError(
       400,
-      "Please clear previous pending months before marking this as paid"
+      "Please clear previous pending months before marking this as paid",
     );
   }
 
@@ -316,10 +303,11 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
 
     // update cumulative fields
     investment.profitReturnTillDate = +Number(
-      (investment.profitReturnTillDate || 0) + Number(profit || 0)
+      (investment.profitReturnTillDate || 0) + Number(profit || 0),
     );
     investment.capitalReturnTillDate = +Number(
-      (investment.capitalReturnTillDate || 0) + Number(month.capitalReturn || 0)
+      (investment.capitalReturnTillDate || 0) +
+        Number(month.capitalReturn || 0),
     );
     investment.TotalPaidTillDate = +(
       investment.profitReturnTillDate + investment.capitalReturnTillDate
@@ -353,12 +341,12 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
 
     const totalReturn = investment.monthlyReturns.reduce(
       (sum, item) => sum + Number(item.capitalReturn + item.profitReturn),
-      0
+      0,
     );
     const OnDate = investment?.endDate?.toISOString()?.split("T")[0];
     await sendSMS(
       `+91${user?.phone}`,
-      `TaqwaFX: Congrats, ${user?.name}! Investment complete. CR Amt: Rs. ${totalReturn} (Principal + Profit) INV ID: ${investment?.investmentId}, Plan: ${investment?.plan?.planName}. End: ${OnDate}. Thank you!`
+      `TaqwaFX: Congrats, ${user?.name}! Investment complete. CR Amt: Rs. ${totalReturn} (Principal + Profit) INV ID: ${investment?.investmentId}, Plan: ${investment?.plan?.planName}. End: ${OnDate}. Thank you!`,
     );
   }
 
@@ -381,7 +369,7 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
 
   await sendSMS(
     `+91${user?.phone}`,
-    `TaqwaFX: Congrats, ${user?.name}! Rs.${month?.totalReturn} profit credited on ${returnMonth}. UTR: ${paymentProof}. Repayment Month: ${monthNo}. Details: ${process.env.APP_LOGIN_SHORT_LINK}`
+    `TaqwaFX: Congrats, ${user?.name}! Rs.${month?.totalReturn} profit credited on ${returnMonth}. UTR: ${paymentProof}. Repayment Month: ${monthNo}. Details: ${process.env.APP_LOGIN_SHORT_LINK}`,
   );
 
   return res
@@ -436,7 +424,7 @@ export const getInvestorInvestments = asyncHandler(async (req, res) => {
 });
 
 export const getInvestorInvAcDetails = asyncHandler(async (req, res) => {
-  const { userId } = req.params; 
+  const { userId } = req.params;
 
   // 1️⃣ Find all investments of that user
   const investments = await investmentModel.find({ userId });
@@ -453,5 +441,49 @@ export const getInvestorInvAcDetails = asyncHandler(async (req, res) => {
   // 3️⃣ Send response
   return res
     .status(200)
-    .json(new ApiResponse(200, InvBankDetails, "Investor Inv Ac Details fetched successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        InvBankDetails,
+        "Investor Inv Ac Details fetched successfully",
+      ),
+    );
 });
+
+// for upload Agreement if it is skip while creating Investment
+export const uploadInvAgreement = asyncHandler(async (req, res) => {
+  const { investmentId } = req.body;
+
+  // 1️⃣ Validate input
+  if (!investmentId) {
+    throw new ApiError(400, "Something went wrong!");
+  }
+
+  if (!req.file) {
+    throw new ApiError(400, "Something went wrong!");
+  }
+
+  // 2️⃣ Check investment exists FIRST
+  const investment = await investmentModel.findOne({ investmentId });
+  if (!investment) {
+throw new ApiError(400, "Something went wrong!");
+  }
+
+  // 3️⃣ Upload to Cloudinary
+  const newFileName = `TaqwaFX-Agreement-${investmentId}-${Date.now()}`;
+  const agreementURL = await uploadFileToCloudinary(req.file, newFileName);
+
+  // 4️⃣ Update DB (new field if not exists)
+  investment.agreementPath = agreementURL;
+  await investment.save();
+
+  // 5️⃣ Response
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      { agreementURL },
+      "Agreement uploaded successfully!"
+    )
+  );
+});
+

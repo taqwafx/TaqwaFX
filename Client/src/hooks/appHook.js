@@ -17,6 +17,7 @@ import {
   logOut,
   markMonthPaid,
   updatePassword,
+  uploadInvAgreement,
 } from "../api/appApi.js";
 import { toast } from "react-hot-toast";
 import { useApp } from "../context/AppContext.jsx";
@@ -93,6 +94,20 @@ export const useGetInvestors = (filters) => {
 export const useCreateInvestment = () => {
   return useMutation({
     mutationFn: createInvestment,
+    onError: (error) => {
+      console.log("AxiosError:", error); // 👈 keep this
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      toast.error(msg); // 👈 this is what should show your message
+    },
+  });
+};
+
+export const useUploadInvAgreement = () => {
+  return useMutation({
+    mutationFn: uploadInvAgreement,
     onError: (error) => {
       console.log("AxiosError:", error); // 👈 keep this
       const msg =

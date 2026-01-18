@@ -35,7 +35,11 @@ const Investors = () => {
   const investors = data?.pages.flatMap((page) => page.data.investors) || [];
 
   const handleChange = (e) => {
-    setFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setFilters((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+      page: 1,
+    }));
   };
 
   useEffect(() => {
@@ -51,7 +55,7 @@ const Investors = () => {
         root: null, // 👈 body / window
         rootMargin: "100px",
         threshold: 0,
-      }
+      },
     );
 
     if (loadMoreRef.current) {
@@ -122,8 +126,32 @@ const Investors = () => {
               required
               value={filters.search}
               onChange={handleChange}
-              onBlur={() => setFilters((prev) => ({ ...prev, search: "" }))}
             />
+
+            {filters.search !== "" && (
+              <div className="absolute inset-y-0 end-0 flex items-center pe-3">
+                <svg
+                  onClick={() =>
+                    setFilters((prev) => ({ ...prev, search: "" }))
+                  }
+                  class="w-6 h-6 text-gray-500 cursor-pointer"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="15"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m15 9-6 6m0-6 6 6m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                  />
+                </svg>
+              </div>
+            )}
           </div>
         </form>
 
@@ -241,7 +269,7 @@ const Investors = () => {
               {investors?.map((investor, index) => {
                 return (
                   <tr
-                    key={index}
+                    key={investor?.investorId}
                     onClick={() =>
                       navigate(`/admin/investors/${investor?.investorId}`)
                     }

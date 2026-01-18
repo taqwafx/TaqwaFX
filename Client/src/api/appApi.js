@@ -70,6 +70,20 @@ export const createInvestment = async (dataObj) => {
   return res.data;
 };
 
+export const uploadInvAgreement = async (dataObj) => {
+  const fd = new FormData();
+
+  // convert plain object → real FormData
+  Object.keys(dataObj).forEach((key) => {
+    if (dataObj[key] !== null && dataObj[key] !== undefined) {
+      fd.append(key, dataObj[key]);
+    }
+  });
+
+  const res = await api.put("/investment/uploadInvAgreement", fd);
+  return res.data;
+};
+
 export const getInvestorInvBankDetails = async (userId) => {
   const res = await api.get(`investment/featch/investment/AcDetails/${userId}`);
   return res.data;
