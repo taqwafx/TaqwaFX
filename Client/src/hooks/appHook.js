@@ -1,16 +1,26 @@
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import {
+  QueryClient,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  createAffiliateIB,
   createInvestment,
   createInvestor,
   createPlan,
   deletePlan,
+  getAdminAffiliateIBDashboard,
   getAdminDashboard,
+  getAffiliateUserById,
   getInvestmentById,
   getInvestorById,
   getInvestorInvBankDetails,
   getInvestorInvestments,
   getInvestors,
   getPlan,
+  getReferralUserInvestments,
   getTransactions,
   getUserDashboard,
   loginUser,
@@ -18,6 +28,8 @@ import {
   markMonthPaid,
   updatePassword,
   uploadInvAgreement,
+  verifyAffiliateIB,
+  verifyInvestorForAffiliateIB,
 } from "../api/appApi.js";
 import { toast } from "react-hot-toast";
 import { useApp } from "../context/AppContext.jsx";
@@ -92,8 +104,14 @@ export const useGetInvestors = (filters) => {
 };
 
 export const useCreateInvestment = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createInvestment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["gGetInvestorDetails"],
+      });
+    },
     onError: (error) => {
       console.log("AxiosError:", error); // 👈 keep this
       const msg =
@@ -121,7 +139,7 @@ export const useUploadInvAgreement = () => {
 
 export const useGetInvestorDetails = (invId) => {
   return useQuery({
-    queryKey: ["investor", invId], // unique cache key per investor
+    queryKey: ["gGetInvestorDetails", invId], // unique cache key per investor
     queryFn: () => getInvestorById(invId),
     enabled: !!invId, // only fetch if id exists
     staleTime: 0,
@@ -147,7 +165,7 @@ export const useGetInvestmentDetails = (investmentId) => {
 
 export const useGetInvestorInvBankDetails = (investmentId) => {
   return useQuery({
-    queryKey: ["getInvestorInvBankDetails" , investmentId],
+    queryKey: ["getInvestorInvBankDetails", investmentId],
     queryFn: () => getInvestorInvBankDetails(investmentId),
     staleTime: 0,
   });
@@ -247,6 +265,79 @@ export const useGetInvestoInvestments = () => {
   return useQuery({
     queryKey: ["getInvestorInvestments"],
     queryFn: () => getInvestorInvestments(),
+    staleTime: 0,
+  });
+};
+
+// affiliate IB
+export const useVerifyAffiliateIB = () => {
+  return useMutation({
+    mutationFn: verifyAffiliateIB,
+    onError: (error) => {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      toast.error(msg);
+    },
+  });
+};
+
+export const useVerifyInvestorForAffiliateIB = () => {
+  return useMutation({
+    mutationFn: verifyInvestorForAffiliateIB,
+    onError: (error) => {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      toast.error(msg);
+    },
+  });
+};
+
+export const useCreateAffiliateIB = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createAffiliateIB,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getAdminAffiliateIBDashboard"],
+      });
+    },
+    onError: (error) => {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      toast.error(msg);
+    },
+  });
+};
+
+export const useGetAffiliateAdminDashboard = () => {
+  return useQuery({
+    queryKey: ["getAdminAffiliateIBDashboard"],
+    queryFn: () => getAdminAffiliateIBDashboard(),
+    staleTime: 0,
+  });
+};
+
+export const useGetAffiliateUserDetails = (affiliateIBId) => {
+  return useQuery({
+    queryKey: ["affiliateIBId", affiliateIBId],
+    queryFn: () => getAffiliateUserById(affiliateIBId),
+    enabled: !!affiliateIBId, // only fetch if id exists
+    staleTime: 0,
+  });
+};
+
+export const useGetReferralUserInvestments = (investorId) => {
+  return useQuery({
+    queryKey: ["investorId", investorId],
+    queryFn: () => getReferralUserInvestments(investorId),
+    enabled: !!investorId, // only fetch if id exists
     staleTime: 0,
   });
 };

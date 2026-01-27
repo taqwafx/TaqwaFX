@@ -39,7 +39,7 @@ export const loginUser = asyncHandler(async (req, res, next) => {
     const token = jwt.sign(
       { id: admin._id, role: admin.role },
       process.env.JWT_SECRET,
-      { expiresIn: "24h" }
+      { expiresIn: "24h" },
     );
 
     return res
@@ -48,8 +48,8 @@ export const loginUser = asyncHandler(async (req, res, next) => {
         new ApiResponse(
           201,
           { user: admin, token },
-          "Admin created successfully"
-        )
+          "Admin created successfully",
+        ),
       );
   }
 
@@ -63,7 +63,7 @@ export const loginUser = asyncHandler(async (req, res, next) => {
   const token = jwt.sign(
     { id: user._id, role: user.role },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_SECRET_EXPIRY }
+    { expiresIn: process.env.JWT_SECRET_EXPIRY },
   );
 
   const options = {
@@ -79,7 +79,8 @@ export const loginUser = asyncHandler(async (req, res, next) => {
 });
 
 export const registerInvestor = asyncHandler(async (req, res) => {
-  const { name, email, phone, password } = req.body;
+  const { name, email, phone, password, referralId, referralCommission } =
+    req.body;
 
   if (!name || !email || !phone || !password) {
     throw new ApiError(400, "All fields are required");
@@ -91,7 +92,22 @@ export const registerInvestor = asyncHandler(async (req, res) => {
   });
 
   if (existingUser) {
-    throw new ApiError(400, "Investor already exists with this email or Mo. Number");
+    throw new ApiError(
+      400,
+      "Investor already exists with this email or Mo. Number",
+    );
+  }
+
+  // Verify referral (ONLY if referralId provided)
+  if (referralId) {
+    const referralAffiliate = await userModel.findOne({
+      "affiliateIB.affiliateIBId": referralId,
+      "affiliateIB.isAffiliateIB": true,
+    });
+
+    if (!referralAffiliate) {
+      throw new ApiError(400, "Invalid or inactive Referral ID");
+    }
   }
 
   // count total investors to generate unique ID
@@ -116,13 +132,19 @@ export const registerInvestor = asyncHandler(async (req, res) => {
     phone,
     password,
     role: "investor",
+    referredBy: referralId
+      ? {
+          referralId: referralId,
+          referralCommission: referralCommission,
+        }
+      : undefined,
   });
 
   investor.password = password;
 
   await sendSMS(
     `+91${phone}`,
-    `Dear ${name}, welcome to TaqwaFX! Investor account is ready. Login ID: ${newInvestorId} / Pswd: ${password} details: ${process.env.APP_LOGIN_SHORT_LINK}`
+    `Dear ${name}, welcome to TaqwaFX! Investor account is ready. Login ID: ${newInvestorId} / Pswd: ${password} details: ${process.env.APP_LOGIN_SHORT_LINK}`,
   );
 
   return res
@@ -173,8 +195,8 @@ export const getAllInvestors = asyncHandler(async (req, res) => {
             totalPages: 0,
           },
         },
-        "No investors found"
-      )
+        "No investors found",
+      ),
     );
 
   const userIds = users.map((u) => u._id);
@@ -199,22 +221,22 @@ export const getAllInvestors = asyncHandler(async (req, res) => {
 
     const totalCapitalAll = userInvs.reduce(
       (sum, i) => sum + (i.capital || 0),
-      0
+      0,
     );
     const runningInvestments = userInvs.filter(
-      (i) => i.status === "Active"
+      (i) => i.status === "Active",
     ).length;
 
     // Find next repayment date (closest pending)
     let nextRepaymentDate = null;
     const allPending = userInvs.flatMap((i) =>
       (i.monthlyReturns || []).filter(
-        (m) => m.status === "pending" && m.returnDate
-      )
+        (m) => m.status === "pending" && m.returnDate,
+      ),
     );
     if (allPending.length) {
       nextRepaymentDate = new Date(
-        Math.min(...allPending.map((m) => new Date(m.returnDate)))
+        Math.min(...allPending.map((m) => new Date(m.returnDate))),
       );
     }
 
@@ -239,7 +261,7 @@ export const getAllInvestors = asyncHandler(async (req, res) => {
 
     if (status) {
       const matched = invs.some(
-        (it) => String(it.status).toLowerCase() === status.toLowerCase()
+        (it) => String(it.status).toLowerCase() === status.toLowerCase(),
       );
       if (!matched) return false;
     }
@@ -254,7 +276,7 @@ export const getAllInvestors = asyncHandler(async (req, res) => {
         (it) =>
           it.plan &&
           String(it.plan.planName).toLowerCase() ===
-            String(planType).toLowerCase()
+            String(planType).toLowerCase(),
       );
       if (!matched) return false;
     }
@@ -270,7 +292,7 @@ export const getAllInvestors = asyncHandler(async (req, res) => {
               new Date(m.returnDate).getDate() === dnum &&
               m.status === "pending"
             );
-          })
+          }),
       );
       if (!matched) return false;
     }
@@ -308,8 +330,8 @@ export const getAllInvestors = asyncHandler(async (req, res) => {
         investors: paged,
         pagination: { total, page: pageNum, limit: pageSize, totalPages },
       },
-      "Investors fetched successfully"
-    )
+      "Investors fetched successfully",
+    ),
   );
 });
 
@@ -349,7 +371,7 @@ export const getInvestorDetails = asyncHandler(async (req, res) => {
 
     // find next repayment date
     const pendingMonths = inv.monthlyReturns?.filter(
-      (m) => m.status === "pending"
+      (m) => m.status === "pending",
     );
     if (pendingMonths?.length > 0) {
       const nearestDate = pendingMonths
@@ -401,7 +423,7 @@ export const getInvestorDetails = asyncHandler(async (req, res) => {
     ([planName, totalFund]) => ({
       planName,
       totalFund,
-    })
+    }),
   );
 
   // Optional: sort by totalFund (highest first)
@@ -412,9 +434,29 @@ export const getInvestorDetails = asyncHandler(async (req, res) => {
     investments.length === 0
       ? "InActive"
       : hasActiveInvestment
-      ? "Active"
-      : "Completed";
+        ? "Active"
+        : "Completed";
 
+  // Get Referral Details
+  let referralUser = null;
+  if (investor?.referredBy) {
+    const affiliateUser = await userModel.findOne(
+      {
+        "affiliateIB.affiliateIBId": investor?.referredBy?.referralId,
+      },
+      {
+        userId: 1,
+        name: 1,
+      },
+    );
+
+    referralUser = {
+      isReferral: true,
+      referralUserId: affiliateUser.userId,
+      referralUserName: affiliateUser.name,
+      referralCommission: investor.referredBy.referralCommission,
+    }
+  }
   // 6️⃣ Prepare final response
   const result = {
     investorId: investor.userId,
@@ -435,13 +477,14 @@ export const getInvestorDetails = asyncHandler(async (req, res) => {
     hasActiveInvestment,
     nextRepaymentDate,
     investments: investmentData,
+    referralUser,
   };
 
   // ✅ Final response
   return res
     .status(200)
     .json(
-      new ApiResponse(200, result, "Investor details fetched successfully")
+      new ApiResponse(200, result, "Investor details fetched successfully"),
     );
 });
 
@@ -484,7 +527,7 @@ export const updateInvestorPassword = asyncHandler(async (req, res) => {
   await sendSMS(
     `+91${investor?.phone}`,
     `Dear ${investor?.name}, your TaqwaFX login password has been changed. \n\nYour New login Password is: \n${newPassword} \n\nThank you for staying with us.
-`
+`,
   );
 
   // ✅ Send response
@@ -494,7 +537,7 @@ export const updateInvestorPassword = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         { password: newPassword },
-        "Investor password updated successfully"
-      )
+        "Investor password updated successfully",
+      ),
     );
 });

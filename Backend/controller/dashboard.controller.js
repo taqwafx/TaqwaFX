@@ -134,6 +134,7 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
 
         // Investment info
         investmentId: "$investmentId",
+        capital: "$capital",
         planType: "$plan.planName",
 
         // 🔥 Month-wise info
@@ -277,7 +278,7 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
   }));
 
   clearMonths.reverse();
-  let firstFiveClearMonths = clearMonths.slice(0, 5);
+  // let firstFiveClearMonths = clearMonths.slice(0, 5); last 5 returns
   comingPayments.sort(
     (a, b) => new Date(a.returnDate) - new Date(b.returnDate)
   );
@@ -301,7 +302,7 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
     totalInvestmentCapital,
     totalPaidTillDate,
     investedByPlan: investedByPlanArray,
-    clearMonths: firstFiveClearMonths,
+    clearMonths: clearMonths,
     comingPayments,
   };
 

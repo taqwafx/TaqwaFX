@@ -47,7 +47,7 @@ export const createPlan = asyncHandler(async (req, res) => {
 
 // 📋 Get all plans
 export const getAllPlans = asyncHandler(async (req, res) => {
-  const plans = await planModel.find().sort({ createdAt: -1 });
+  const plans = await planModel.find().sort({ createdAt: 1 });
   return res
     .status(200)
     .json(new ApiResponse(200, plans, "All plans fetched successfully"));

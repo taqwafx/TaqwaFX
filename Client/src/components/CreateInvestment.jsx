@@ -63,7 +63,8 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if(AcSelectorValue === "Select Ac. Details") return toast.error("Please Select Ac. Details");
+    if (AcSelectorValue === "Select Ac. Details")
+      return toast.error("Please Select Ac. Details");
     createInvestment.mutate(formData);
   };
 
@@ -91,7 +92,7 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
 
     if (AcSelectorValue.startsWith("INV")) {
       const bankDetails = investorInvAcDetails.find(
-        (item) => item.investmentId === AcSelectorValue
+        (item) => item.investmentId === AcSelectorValue,
       );
       setFormData((prev) => ({
         ...prev,
@@ -162,9 +163,9 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
       bankHolderName: "",
       bankAcNumber: "",
       bankIFSCCode: "",
-      agreementFile: null
+      agreementFile: null,
     });
-    setAcSelectorValue("Select Ac. Details")
+    setAcSelectorValue("Select Ac. Details");
   }, [showModel]);
 
   return (
@@ -474,76 +475,79 @@ const CreateInvestment = ({ userId, refetch, setInvestor }) => {
                 </div>
 
                 {AcSelectorValue !== "Select Ac. Details" && (
-                <>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label
-                      for="bankName"
-                      className="block mb-2 text-sm font-medium text-gray-900"
-                    >
-                      Bank Name
-                    </label>
-                    <input
-                      type="text"
-                      name="bankName"
-                      id="bankName"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      value={formData.bankName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label
-                      for="bankHolderName"
-                      className="block mb-2 text-sm font-medium text-gray-900"
-                    >
-                      Bank Holder Name
-                    </label>
-                    <input
-                      type="text"
-                      name="bankHolderName"
-                      id="bankHolderName"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      value={formData.bankHolderName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label
-                      for="bankAcNumber"
-                      className="block mb-2 text-sm font-medium text-gray-900"
-                    >
-                      Account Number
-                    </label>
-                    <input
-                      type="text"
-                      name="bankAcNumber"
-                      id="bankAcNumber"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      value={formData.bankAcNumber}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label
-                      for="bankIFSCCode"
-                      className="block mb-2 text-sm font-medium text-gray-900"
-                    >
-                      IFSC Code
-                    </label>
-                    <input
-                      type="text"
-                      name="bankIFSCCode"
-                      id="bankIFSCCode"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      value={formData.bankIFSCCode}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </>
+                  <>
+                    <div className="col-span-2 sm:col-span-1">
+                      <label
+                        for="bankName"
+                        className="block mb-2 text-sm font-medium text-gray-900"
+                      >
+                        Bank Name
+                      </label>
+                      <input
+                        type="text"
+                        name="bankName"
+                        id="bankName"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        value={formData.bankName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="col-span-2 sm:col-span-1">
+                      <label
+                        for="bankHolderName"
+                        className="block mb-2 text-sm font-medium text-gray-900"
+                      >
+                        Bank Holder Name
+                      </label>
+                      <input
+                        type="text"
+                        name="bankHolderName"
+                        id="bankHolderName"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        value={formData.bankHolderName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="col-span-2 sm:col-span-1">
+                      <label
+                        for="bankAcNumber"
+                        className="block mb-2 text-sm font-medium text-gray-900"
+                      >
+                        Account Number
+                      </label>
+                      <input
+                        type="text"
+                        name="bankAcNumber"
+                        id="bankAcNumber"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        value={formData.bankAcNumber}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="col-span-2 sm:col-span-1">
+                      <label
+                        for="bankIFSCCode"
+                        className="block mb-2 text-sm font-medium text-gray-900"
+                      >
+                        IFSC Code
+                      </label>
+                      <input
+                        type="text"
+                        name="bankIFSCCode"
+                        id="bankIFSCCode"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        value={formData.bankIFSCCode}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </>
                 )}
               </div>
 

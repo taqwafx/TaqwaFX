@@ -27,8 +27,11 @@ import UserPlans from "../pages/user/UserPlans.jsx";
 import "flowbite";
 import "flowbite-react";
 import Transactions from "../pages/admin/Transactions.jsx";
-import Provider from "../pages/admin/Provider.jsx";
 import ScrollToTop from "../components/ScrollToTop.jsx";
+import AffiliateIB from "../pages/admin/AffiliateIB.jsx";
+import UserAffiliateIB from "../pages/user/UserAffiliateIB.jsx";
+import UserAffiliateIBInvestments from "../pages/user/UserAffiliateIBInvestments.jsx";
+import AffiliateIBDetails from "../pages/admin/AffiliateIBDetails.jsx";
 
 const AppRoutes = () => {
   return (
@@ -51,7 +54,11 @@ const AppRoutes = () => {
             />
             <Route path="/admin/plans" element={<Plans />} />
             <Route path="/admin/transactions" element={<Transactions />} />
-            <Route path="/admin/providerflow" element={<Provider />} />
+            <Route path="/admin/affiliateIB" element={<AffiliateIB />} />
+            <Route
+              path="/admin/affiliateIB/:affiliateIBId"
+              element={<AffiliateIBDetails />}
+            />
           </Route>
 
           {/* User Routes */}
@@ -63,6 +70,12 @@ const AppRoutes = () => {
               element={<UserInvestment />}
             />
             <Route path="/user/plans" element={<UserPlans />} />
+
+            <Route path="/user/affiliateIB" element={<UserAffiliateIB />} />
+            <Route
+              path="/user/affiliateIB/referral/:investorId"
+              element={<UserAffiliateIBInvestments />}
+            />
           </Route>
         </Route>
 

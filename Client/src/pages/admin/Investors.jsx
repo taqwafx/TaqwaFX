@@ -240,7 +240,7 @@ const Investors = () => {
 
         <div className="relative overflow-x-auto">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 text-nowrap">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full text-nowrap whitespace-nowrap">
               <tr>
                 <th scope="col" className="px-6 py-3">
                   Investor ID
@@ -273,7 +273,7 @@ const Investors = () => {
                     onClick={() =>
                       navigate(`/admin/investors/${investor?.investorId}`)
                     }
-                    className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                    className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-nowrap whitespace-nowrap"
                   >
                     <td className="px-6 py-4 font-medium">
                       {investor?.investorId}

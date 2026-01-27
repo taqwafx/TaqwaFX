@@ -136,3 +136,34 @@ export const getInvestorInvestments = async () => {
   const res = await api.get(`/investment/featch/investores/`);
   return res.data;
 };
+
+export const verifyAffiliateIB = async (formData) => {
+  const res = await api.post("/affiliateIB/verifyAffiliateIBID", formData);
+  return res.data;
+};
+
+export const verifyInvestorForAffiliateIB = async (formData) => {
+  const res = await api.post("/affiliateIB/verifyInvestorForAffiliateIB", formData);
+  return res.data;
+};
+
+export const createAffiliateIB = async (formData) => {
+  const res = await api.post("/affiliateIB/createAffiliateIB", formData);
+  return res.data;
+};
+
+export const getAdminAffiliateIBDashboard = async () => {
+  const res = await api.get("/affiliateIB/admin/dashboard");
+  return res.data;
+};
+
+export const getAffiliateUserById = async (affiliateIBId) => {
+  const res = await api.get(`/affiliateIB/getAffiliateIBDetailById/${affiliateIBId}`);
+  return res.data;
+};
+
+export const getReferralUserInvestments = async (investorId) => {
+  const res = await api.get(`/affiliateIB/getReferralUserInvestments/${investorId}`);
+  return res.data;
+};
+

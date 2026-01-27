@@ -72,6 +72,9 @@ export const addMonthsSafe = (date, months) => {
 
 export const formatDateToIST = (dateInput, withTime = false) => {
   const date = new Date(dateInput);
+  
+  if(!dateInput) return '-';
+  
 
   const datePart = date
     .toLocaleDateString("en-IN", {

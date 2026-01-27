@@ -9,12 +9,14 @@ const TransactionSchema = new mongoose.Schema({
     required: true,
   }, // Investment ref
   investmentId: { type: String, required: true }, // e.g. INV5001-1
+  invCapital:  { type: Number },
   paidMonthNo: { type: Number },
   returnDate: { type: Date },
   paidAMT: { type: Number },
   paidAt: { type: Date },
   paymentType: { type: String },
   plan: { type: mongoose.Schema.Types.ObjectId, ref: "Plans", required: true },
+  isCommiEntery: {type: Boolean},
 });
 
 export const TransactionModel = mongoose.model(

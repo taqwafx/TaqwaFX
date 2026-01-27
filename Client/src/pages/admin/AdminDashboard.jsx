@@ -8,11 +8,18 @@ import { formatDateToIST, formatRupee } from "../../utils/helper.js";
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [adminDashboard, setAdminDashboard] = useState({});
+  const [totalPaying, setTotalPaying] = useState(0);
   const { data, isSuccess, isLoading, refetch, isError, error } =
     useGetAdminDashboard();
 
   useEffect(() => {
     setAdminDashboard(data?.data);
+
+    const totalProfit = data?.data?.upcomingRepayments?.reduce(
+      (sum, inv) => sum + (inv.monthlyProfit || 0),
+      0,
+    );
+    setTotalPaying(totalProfit);
   }, [isSuccess]);
 
   useEffect(() => {
@@ -172,7 +179,7 @@ const AdminDashboard = () => {
 
           <div className="relative w-full h-full max-h-full max-w-full overflow-auto overflow-x-auto">
             <table className="w-full max-h-full  text-sm text-left rtl:text-right text-gray-500 text-nowrap">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full text-nowrap whitespace-nowrap">
                 <tr>
                   <th scope="col" className="px-6 py-3">
                     Rank
@@ -198,7 +205,7 @@ const AdminDashboard = () => {
                     onClick={() =>
                       navigate(`/admin/investors/${inv.investorId}`)
                     }
-                    className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                    className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-nowrap whitespace-nowrap"
                   >
                     <td className="px-6 py-4 font-medium">{inv?.rank}</td>
                     <td className="px-6 py-4 font-medium">{inv?.investorId}</td>
@@ -228,8 +235,8 @@ const AdminDashboard = () => {
         </h1>
 
         <div className="relative overflow-x-auto">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 bg-green-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full">
+          <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full text-nowrap whitespace-nowrap">
               <tr>
                 <th scope="col" className="px-6 py-3">
                   Investor ID
@@ -239,6 +246,9 @@ const AdminDashboard = () => {
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Inv. ID
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Capital
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Plan
@@ -260,10 +270,10 @@ const AdminDashboard = () => {
                   key={index}
                   onClick={() =>
                     navigate(
-                      `/admin/investors/${inv?.investorId}/investment/${inv?.investmentId}`
+                      `/admin/investors/${inv?.investorId}/investment/${inv?.investmentId}`,
                     )
                   }
-                  className={`border-b cursor-pointer ${
+                  className={`border-b cursor-pointer text-nowrap whitespace-nowrap ${
                     inv?.isOverdue
                       ? "bg-red-100 text-red-800 border-gray-400"
                       : "bg-white hover:bg-gray-50 border-gray-200"
@@ -272,6 +282,9 @@ const AdminDashboard = () => {
                   <td className="px-6 py-4 font-medium">{inv?.investorId}</td>
                   <td className="px-6 py-4 font-medium">{inv?.name}</td>
                   <td className="px-6 py-4 font-medium">{inv?.investmentId}</td>
+                  <td className="px-6 py-4 font-medium">
+                    {formatRupee(inv?.capital)}
+                  </td>
                   <td className="px-6 py-4 font-medium">{inv?.planType}</td>
                   <td className="px-6 py-4 font-medium">{inv?.monthNo}</td>
                   <td className="px-6 py-4 font-medium">
@@ -284,6 +297,15 @@ const AdminDashboard = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div className="flex items-end justify-end mt-5">
+        <div className="max-w-max bg-white rounded-lg shadow py-2 px-3 border">
+          <span className=" font-medium m-1">
+            Total Paying :-{" "}
+            <span className=" text-blue-700">{formatRupee(totalPaying)}</span>
+          </span>
         </div>
       </div>
     </main>

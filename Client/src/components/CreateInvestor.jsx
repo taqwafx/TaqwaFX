@@ -1,17 +1,20 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   emailRegex,
   phoneRegex,
   strongPasswordRegex,
 } from "../utils/validations.js";
-import { useCreateInvestor } from "../hooks/appHook.js";
+import { useCreateInvestor, useVerifyAffiliateIB } from "../hooks/appHook.js";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import Loader from "./Loader.jsx";
 
 const CreateInvestor = ({ refetch }) => {
   const [showCreatInvestorModel, setShowCreatInvestorModel] = useState(false);
   const [showAlertModel, setAlertShowModel] = useState(false);
+
   const createInvestor = useCreateInvestor();
+  const verifyReferralId = useVerifyAffiliateIB();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -19,10 +22,19 @@ const CreateInvestor = ({ refetch }) => {
     phone: "",
     password: "",
     confirmPassword: "",
+    referralId: "",
+    referralCommission: "",
   });
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleVerifyAffiliateID = () => {
+    if (verifyReferralId.isSuccess && formData.referralId?.length > 1) {
+      if (!verifyReferralId?.data?.data?.isValid)
+        toast.error(verifyReferralId?.data?.message);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -33,7 +45,7 @@ const CreateInvestor = ({ refetch }) => {
       return toast.error("Please enter a valid Indian phone number.");
     if (!strongPasswordRegex.test(formData.password))
       return toast.error(
-        "Password must have 8+ chars, 1 uppercase, 1 lowercase, 1 number & 1 special symbol."
+        "Password must have 8+ chars, 1 uppercase, 1 lowercase, 1 number & 1 special symbol.",
       );
     if (formData.password !== formData.confirmPassword)
       return toast.error("Please Enter Correct Password!");
@@ -41,15 +53,20 @@ const CreateInvestor = ({ refetch }) => {
   };
 
   useEffect(() => {
+    if (verifyReferralId.isSuccess && formData.referralId?.length > 1) {
+      if (verifyReferralId?.data?.data?.isValid)
+        toast.success(verifyReferralId?.data?.message);
+    }
+  }, [verifyReferralId.data]);
+
+  useEffect(() => {
+    if (formData.referralId?.length > 1)
+      verifyReferralId?.mutate({ referralId: formData.referralId });
+  }, [formData.referralId]);
+
+  useEffect(() => {
     if (createInvestor.isSuccess) {
       setShowCreatInvestorModel(false);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        password: "",
-        confirmPassword: "",
-      });
     }
 
     if (createInvestor?.data) {
@@ -58,6 +75,18 @@ const CreateInvestor = ({ refetch }) => {
       setAlertShowModel(true);
     }
   }, [createInvestor?.isSuccess, createInvestor?.data]);
+
+  useEffect(() => {
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      referralId: "",
+      referralCommission: "",
+    });
+  }, [showCreatInvestorModel]);
   return (
     <>
       {/* <!-- Modal toggle --> */}
@@ -215,6 +244,95 @@ const CreateInvestor = ({ refetch }) => {
                     onChange={handleChange}
                     required
                   />
+                </div>
+
+                <div className="col-span-2">
+                  <div className="mb-3">
+                    <span className="block mb-1 text-base font-medium text-gray">
+                      Optional
+                    </span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="col-span-2 sm:col-span-1 relative">
+                      <label
+                        for="password"
+                        className="block mb-2 text-sm font-medium text-gray-900"
+                      >
+                        Referral ID
+                      </label>
+                      <input
+                        type="text"
+                        name="referralId"
+                        id="referralId"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        value={formData.referralId}
+                        onChange={handleChange}
+                        onBlur={handleVerifyAffiliateID}
+                      />
+                      <div className="absolute right-2 top-9">
+                        {(verifyReferralId.isLoading ||
+                          verifyReferralId.isPending) && <Loader w={6} h={6} />}
+
+                        {verifyReferralId.isSuccess &&
+                          verifyReferralId?.data?.data?.isValid &&
+                          formData.referralId?.length > 1 && (
+                            <svg
+                              class="w-6 h-6 text-gray-600"
+                              aria-hidden="true"
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm13.707-1.293a1 1 0 0 0-1.414-1.414L11 12.586l-1.793-1.793a1 1 0 0 0-1.414 1.414l2.5 2.5a1 1 0 0 0 1.414 0l4-4Z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                          )}
+
+                        {verifyReferralId.isSuccess &&
+                          !verifyReferralId?.data?.data?.isValid &&
+                          formData.referralId?.length > 1 && (
+                            <span className=" font-medium text-base text-red-800">
+                              ❗
+                            </span>
+                          )}
+                      </div>
+                    </div>
+
+                    <div className="col-span-2 sm:col-span-1">
+                      <label
+                        for="confirmPassword"
+                        className="block mb-2 text-sm font-medium text-gray-900"
+                      >
+                        Referral Commision
+                      </label>
+                      <input
+                        type="text"
+                        name="referralCommission"
+                        id="referralCommission"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        value={formData.referralCommission}
+                        onChange={handleChange}
+                        required={formData.referralId !== ""}
+                      />
+                    </div>
+                  </div>
+
+                  {verifyReferralId.isSuccess &&
+                    verifyReferralId.data &&
+                    verifyReferralId?.data?.data?.isValid &&
+                    formData.referralId?.length > 1 && (
+                      <span className="mt-1 block text-sm font-medium">
+                        Referral By
+                        <span className=" ms-1 text-green-500">
+                          {verifyReferralId?.data?.data?.affiliateName}
+                        </span>
+                      </span>
+                    )}
                 </div>
               </div>
 

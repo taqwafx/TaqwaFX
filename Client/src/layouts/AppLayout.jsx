@@ -259,10 +259,12 @@ const AppLayout = () => {
               </NavLink>
             </li>
 
-            <li className={`${user?.role === "admin" ? "block" : "hidden"}`}>
+            <li className={`${user?.affiliateIB?.isAffiliateIB || user?.role === "admin" ? "block" : "hidden"}`}>
               <NavLink
                 onClick={toggleSidebar}
-                to="/admin/providerflow"
+                to={`${
+                  user?.role === "admin" ? "/admin/affiliateIB" : "/user/affiliateIB"
+                }`}
                 className={({ isActive }) =>
                   `flex items-center p-5 text-gray-900 rounded-lg group ${
                     isActive ? "bg-blue-100" : "hover:bg-gray-100"
@@ -272,24 +274,24 @@ const AppLayout = () => {
                 {({ isActive }) => (
                   <>
                     <svg
-                      className={`w-6 h-6 text-gray-500 transition duration-75 rotate-90 ${
+                      className={`w-6 h-6 text-gray-500 transition duration-75 ${
                         isActive ? "text-gray-900" : "group-hover:text-gray-900"
                       } `}
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
+                      width="24"
+                      height="24"
+                      fill="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M8 20V7m0 13-4-4m4 4 4-4m4-12v13m0-13 4 4m-4-4-4 4"
+                        fill-rule="evenodd"
+                        d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H6Zm7.25-2.095c.478-.86.75-1.85.75-2.905a5.973 5.973 0 0 0-.75-2.906 4 4 0 1 1 0 5.811ZM15.466 20c.34-.588.535-1.271.535-2v-1a5.978 5.978 0 0 0-1.528-4H18a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2h-4.535Z"
+                        clip-rule="evenodd"
                       />
                     </svg>
 
-                    <span className="ms-3">Provider Flow</span>
+                    <span className="ms-3">Affiliate/IB</span>
                   </>
                 )}
               </NavLink>

@@ -12,6 +12,33 @@ const userSchema = new mongoose.Schema({
     enum: ["admin", "investor"],
     default: "investor",
   },
+
+  // 🔥 AffiliateIB Object
+  affiliateIB: {
+    isAffiliateIB: { type: Boolean, default: false },
+    affiliateIBId: { type: String }, // AIB-TFX5016
+
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "inactive",
+    },
+
+    bankDetails: {
+      bankName: { type: String },
+      bankHolderName: { type: String },
+      bankAcNumber: { type: String },
+      bankIFSCCode: { type: String },
+    },
+
+    createdAt: { type: Date },
+  },
+
+  referredBy: {
+    referralId: { type: String }, // AIB-TFX4001
+    referralCommission: { type: Number }, // 1 / 1.5 / 2
+  },
+
   createdAt: { type: Date, default: Date.now },
 });
 

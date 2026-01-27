@@ -17,7 +17,9 @@ const UserInvestments = () => {
     useGetInvestoInvestments();
 
   useEffect(() => {
-    setInvestments(data?.data);
+    if (isSuccess && data?.data) {
+      setInvestments(data?.data);
+    }
   }, [isSuccess]);
 
   if (isLoading)
@@ -63,8 +65,8 @@ const UserInvestments = () => {
         </h1>
 
         <div className="relative overflow-x-auto">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 bg-green-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full">
+          <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full text-nowrap whitespace-nowrap">
               <tr>
                 <th scope="col" className="px-6 py-3">
                   Investment ID
@@ -97,47 +99,49 @@ const UserInvestments = () => {
             </thead>
             <tbody>
               {investments?.map((inv, index) => (
-                <tr
-                  key={index}
-                  onClick={() =>
-                    navigate(`/user/investments/${inv?.investmentId}`)
-                  }
-                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
-                >
-                  <td className="px-6 py-4 font-medium">{inv?.investmentId}</td>
-                  <td className="px-6 py-4 font-medium">
-                    {formatRupee(inv?.capital)}
-                  </td>
-                  <td className="px-6 py-4 font-medium">{inv?.planType}</td>
-                  <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
-                  <td className="px-6 py-4 font-medium text-nowrap">
-                    {/* {addMonthsSafe(inv?.startFrom, 1)
+                  <tr
+                    key={index}
+                    onClick={() =>
+                      navigate(`/user/investments/${inv?.investmentId}`)
+                    }
+                    className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-nowrap whitespace-nowrap"
+                  >
+                    <td className="px-6 py-4 font-medium">
+                      {inv?.investmentId}
+                    </td>
+                    <td className="px-6 py-4 font-medium">
+                      {formatRupee(inv?.capital)}
+                    </td>
+                    <td className="px-6 py-4 font-medium">{inv?.planType}</td>
+                    <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
+                    <td className="px-6 py-4 font-medium text-nowrap">
+                      {/* {addMonthsSafe(inv?.startFrom, 1)
                       ?.toISOString()
                       ?.split("T")[0] || "-"} */}
-                    {formatDateToIST(addMonthsSafe(inv?.startFrom, 1)) || "-"}
-                  </td>
-                  <td className="px-6 py-4 font-medium text-nowrap">
-                    {formatDateToIST(inv?.endFrom) || "-"}
-                  </td>
-                  <td className="px-6 py-4 font-medium text-nowrap">
-                    {formatDateToIST(inv?.repaymentOn) || "-"}
-                  </td>
-                  <td className="px-6 py-4 font-medium">
-                    {inv?.completedMonths}
-                  </td>
-                  <td className="px-6 py-4 font-medium">
-                    <span
-                      className={`${
-                        inv?.status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      } text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm`}
-                    >
-                      {inv?.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                      {formatDateToIST(addMonthsSafe(inv?.startFrom, 1)) || "-"}
+                    </td>
+                    <td className="px-6 py-4 font-medium text-nowrap">
+                      {formatDateToIST(inv?.endFrom) || "-"}
+                    </td>
+                    <td className="px-6 py-4 font-medium text-nowrap">
+                      {formatDateToIST(inv?.repaymentOn) || "-"}
+                    </td>
+                    <td className="px-6 py-4 font-medium">
+                      {inv?.completedMonths}
+                    </td>
+                    <td className="px-6 py-4 font-medium">
+                      <span
+                        className={`${
+                          inv?.status === "Active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        } text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm`}
+                      >
+                        {inv?.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

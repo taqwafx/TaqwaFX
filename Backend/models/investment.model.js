@@ -16,8 +16,13 @@ const monthSchema = new mongoose.Schema(
     },
     paymentType: { type: String },
     paymentProof: { type: String },
+    referrad: {
+      totalReturn: { type: Number },
+      paymentType: { type: String },
+      paymentProof: { type: String },
+    },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const investmentSchema = new mongoose.Schema({

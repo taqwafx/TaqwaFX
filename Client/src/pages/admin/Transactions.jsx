@@ -31,7 +31,7 @@ const Transactions = () => {
         root: null, // 👈 body / window
         rootMargin: "100px",
         threshold: 0,
-      }
+      },
     );
 
     if (loadMoreRef.current) {
@@ -93,8 +93,8 @@ const Transactions = () => {
           </div>
         </div>
         <div className="relative overflow-x-auto">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 bg-green-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full">
+          <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full text-nowrap whitespace-nowrap">
               <tr>
                 <th scope="col" className="px-6 py-3">
                   Investor
@@ -102,7 +102,9 @@ const Transactions = () => {
                 <th scope="col" className="px-6 py-3">
                   INV. ID
                 </th>
-
+                <th scope="col" className="px-6 py-3">
+                  Capital
+                </th>
                 <th scope="col" className="px-6 py-3">
                   Plan
                 </th>
@@ -127,13 +129,16 @@ const Transactions = () => {
               {transactions?.map((tran, key) => (
                 <tr
                   key={key}
-                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-nowrap whitespace-nowrap"
                 >
                   <td className="px-6 py-4 font-medium whitespace-nowrap">
                     {tran?.user?.name}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {tran?.investmentId}
+                  </td>
+                  <td className="px-6 py-4 font-medium">
+                    {tran?.invCapital === 0 ? "Commision" : formatRupee(tran?.invCapital) }
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {tran?.plan?.planName}
@@ -163,7 +168,7 @@ const Transactions = () => {
           </div>
         )}
 
-        {transactions.length < 1 && !isFetchingNextPage && !isLoading &&  (
+        {transactions.length < 1 && !isFetchingNextPage && !isLoading && (
           <div className="flex justify-center items-center relative pt-5 font-medium">
             You Didn’t make Any Transaction Ye't
           </div>

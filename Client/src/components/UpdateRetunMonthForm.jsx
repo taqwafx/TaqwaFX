@@ -3,13 +3,14 @@ import { useMarkMonthAsPaid } from "../hooks/appHook.js";
 import toast from "react-hot-toast";
 import { formatRupee } from "../utils/helper.js";
 
-
 const UpdateRetunMonthForm = ({
   showModel,
   setShowModel,
   repaymentData,
   setInvestment,
   investment,
+  isRefferdUser,
+  affiliateUserCommision,
   refetch,
 }) => {
   const markMonth = useMarkMonthAsPaid();
@@ -18,11 +19,19 @@ const UpdateRetunMonthForm = ({
     monthNo: 0,
     paymentType: "",
     paymentProof: "",
+    commisionPaymentType: "",
+    commisionPaymentProof: "",
     roiUnknown: false,
+    commision: 0
   });
 
   const handleChange = (e) => {
-    if (e.target.name === "paymentType" || e.target.name === "paymentProof")
+    if (
+      e.target.name === "paymentType" ||
+      e.target.name === "paymentProof" ||
+      e.target.name === "commisionPaymentType" ||
+      e.target.name === "commisionPaymentProof"
+    )
       return setFormData((prev) => ({
         ...prev,
         [e.target.name]: e.target.value,
@@ -40,7 +49,7 @@ const UpdateRetunMonthForm = ({
     e.preventDefault();
     if (
       confirm(
-        "Are You Sure You Want to Mark this Month as Paid after this you can't change it"
+        "Are You Sure You Want to Mark this Month as Paid after this you can't change it",
       )
     ) {
       markMonth.mutate(formData);
@@ -52,7 +61,8 @@ const UpdateRetunMonthForm = ({
       ...prev,
       monthNo: repaymentData.monthNo,
       id: repaymentData.id,
-      roiUnknown: investment.roiUnknown
+      roiUnknown: investment.roiUnknown,
+      commision: investment?.capital * (affiliateUserCommision / 100),
     }));
   }, [repaymentData, investment]);
 
@@ -66,6 +76,8 @@ const UpdateRetunMonthForm = ({
       setFormData({
         paymentType: "",
         paymentProof: "",
+        commisionPaymentType: "",
+        commisionPaymentProof: "",
       });
       refatchData();
     }
@@ -82,6 +94,8 @@ const UpdateRetunMonthForm = ({
         monthNo: 0,
         paymentType: "",
         paymentProof: "",
+        commisionPaymentType: "",
+        commisionPaymentProof: "",
       });
     }
   }, [markMonth?.isError]);
@@ -138,6 +152,16 @@ const UpdateRetunMonthForm = ({
                     {formatRupee(repaymentData?.totalReturn)}
                   </span>
                 </span>
+                {isRefferdUser && (
+                  <span>
+                    Commision Return:{" "}
+                    <span className=" font-medium">
+                      {formatRupee(
+                        formData.commision,
+                      )}
+                    </span>
+                  </span>
+                )}
                 <span>
                   Repayment Date:{" "}
                   <span className=" font-medium">
@@ -163,6 +187,7 @@ const UpdateRetunMonthForm = ({
                     required
                   />
                 </div>
+
                 <div className="col-span-2 sm:col-span-1 mb-4">
                   <label
                     for="paymentProof"
@@ -180,24 +205,66 @@ const UpdateRetunMonthForm = ({
                     required
                   />
                 </div>
-                <div className="col-span-2 sm:col-span-1 mb-4">
-                  <label
-                    for="profit"
-                    className="block mb-2 text-sm font-medium text-gray-900 "
-                  >
-                    Profit
-                  </label>
-                  <input
-                    disabled={!formData?.roiUnknown}
-                    type="text"
-                    name="profit"
-                    id="profit"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                    value={formData?.profit}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+
+                {formData?.roiUnknown && (
+                  <div className="col-span-2 sm:col-span-1 mb-4">
+                    <label
+                      for="profit"
+                      className="block mb-2 text-sm font-medium text-gray-900 "
+                    >
+                      Profit
+                    </label>
+                    <input
+                      disabled={!formData?.roiUnknown}
+                      type="text"
+                      name="profit"
+                      id="profit"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      value={formData?.profit}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                )}
+
+                {isRefferdUser && (
+                  <>
+                    <div className="col-span-2 sm:col-span-1 mb-4">
+                      <label
+                        for="commisionPaymentType"
+                        className="block mb-2 text-sm font-medium text-gray-900 "
+                      >
+                        Commision Payment Type
+                      </label>
+                      <input
+                        type="text"
+                        name="commisionPaymentType"
+                        id="commisionPaymentType"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        value={formData.commisionPaymentType}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="col-span-2 sm:col-span-1 mb-4">
+                      <label
+                        for="commisionPaymentProof"
+                        className="block mb-2 text-sm font-medium text-gray-900 "
+                      >
+                        Commision Payment Proof
+                      </label>
+                      <input
+                        type="text"
+                        name="commisionPaymentProof"
+                        id="commisionPaymentProof"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        value={formData.commisionPaymentProof}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               <button
@@ -215,4 +282,4 @@ const UpdateRetunMonthForm = ({
   );
 };
 
-export default UpdateRetunMonthForm
+export default UpdateRetunMonthForm;

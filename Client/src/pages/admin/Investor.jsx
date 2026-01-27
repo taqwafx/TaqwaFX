@@ -30,7 +30,7 @@ const Investor = () => {
   const passwordRef = useRef();
   const updatePassBtnRef = useRef();
 
-  const { data, isLoading, isSuccess, refetch, isError } =
+  const { data, isLoading, isSuccess, isError, refetch } =
     useGetInvestorDetails(investorId);
 
   const handleChange = (e) => {
@@ -63,30 +63,29 @@ const Investor = () => {
     }
   };
 
-const onFilterDateChange = (e) => {
-  const value = e.target.value;
+  const onFilterDateChange = (e) => {
+    const value = e.target.value;
 
-  // 🔁 Clear filter → show all investments
-  if (!value) {
-    setInvestments(data?.data?.investments);
-    return;
-  }
+    // 🔁 Clear filter → show all investments
+    if (!value) {
+      setInvestments(data?.data?.investments);
+      return;
+    }
 
-  const selected = new Date(value);
-  selected.setHours(0, 0, 0, 0);
+    const selected = new Date(value);
+    selected.setHours(0, 0, 0, 0);
 
-  const filtered = data?.data?.investments?.filter((inv) => {
-    if (!inv.repaymentDate) return false;
+    const filtered = data?.data?.investments?.filter((inv) => {
+      if (!inv.repaymentDate) return false;
 
-    const created = new Date(inv.repaymentDate);
-    created.setHours(0, 0, 0, 0);
+      const created = new Date(inv.repaymentDate);
+      created.setHours(0, 0, 0, 0);
 
-    return created.getTime() === selected.getTime();
-  });
+      return created.getTime() === selected.getTime();
+    });
 
-  setInvestments(filtered);
-};
-
+    setInvestments(filtered);
+  };
 
   useEffect(() => {
     setFormData({
@@ -98,7 +97,7 @@ const onFilterDateChange = (e) => {
   useEffect(() => {
     setInvestor(data?.data);
     setInvestments(data?.data?.investments);
-  }, [isSuccess]);
+  }, [isSuccess, data]);
 
   useEffect(() => {
     if (updatePassword?.isSuccess) {
@@ -164,20 +163,22 @@ const onFilterDateChange = (e) => {
                 />
               </svg>
               <span className="ms-1 text-sm font-medium text-gray-500 md:ms-2">
-                Investor
+                {investorId}
               </span>
             </div>
           </li>
         </ol>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <div className="bg-white rounded-lg p-6 border border-slate-200 shadow">
+      <div className="flex flex-col xl:flex-row gap-3">
+        <div className="bg-white rounded-lg p-6 border border-slate-200 shadow w-full">
           <h1 className=" mb-6 font-bold leading-7 text-xl pb-4 border-b border-[#e5e7eb]">
             Investor Details
           </h1>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div
+            className={`grid grid-cols-1 gap-12 ${investor?.referralUser?.isReferral ? "lg:grid-cols-3" : "lg:grid-cols-2"}`}
+          >
             {/* Left Column */}
             <div className="space-y-8">
               {/* Full Name */}
@@ -205,7 +206,7 @@ const onFilterDateChange = (e) => {
               </div>
             </div>
 
-            {/* Right Column */}
+            {/* Middle Column */}
             <div className="space-y-8">
               {/* Full Name */}
               <div>
@@ -239,10 +240,45 @@ const onFilterDateChange = (e) => {
                 </span>
               </div>
             </div>
+
+            {/* Right Column  */}
+            {investor?.referralUser?.isReferral && (
+              <div className="space-y-8">
+                {/* Full Name */}
+                <div>
+                  <h3 className="text-md font-semibold text-slate-900 mb-1">
+                    Referral By:
+                  </h3>
+                  <p className="text-slate-600">
+                    {investor?.referralUser?.referralUserName}
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-md font-semibold text-slate-900 mb-1">
+                    Referral User ID:
+                  </h3>
+                  <p className="text-slate-600">
+                    {investor?.referralUser?.referralUserId}
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-md font-semibold text-slate-900 mb-1">
+                    Referral Commision:
+                  </h3>
+                  <p className="text-slate-600">
+                    {investor?.referralUser?.referralCommission}%
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 border border-slate-200 shadow">
+        <div
+          className={`bg-white rounded-lg p-6 border border-slate-200 shadow w-full ${investor?.referralUser?.isReferral && " max-w-[500px]"}`}
+        >
           <h1 className="mb-6 font-bold leading-7 text-xl pb-4 border-b border-[#e5e7eb]">
             Login Details
           </h1>
@@ -418,7 +454,7 @@ const onFilterDateChange = (e) => {
 
         <div className="relative overflow-x-auto">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 bg-green-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full text-nowrap whitespace-nowrap">
               <tr>
                 <th scope="col" className="px-6 py-3">
                   Investment ID
@@ -458,7 +494,7 @@ const onFilterDateChange = (e) => {
                       `/admin/investors/${investor?.investorId}/investment/${inv?.investmentId}`,
                     )
                   }
-                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-nowrap whitespace-nowrap"
                 >
                   <td className="px-6 py-4 font-medium">{inv?.investmentId}</td>
                   <td className="px-6 py-4 font-medium">

@@ -136,7 +136,7 @@ const Investment = () => {
                 to={-1}
                 className="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2"
               >
-                Investor
+                {investment?.userId}
               </Link>
             </div>
           </li>
@@ -257,7 +257,7 @@ const Investment = () => {
                   <Loader />
                 </div>
               ) : (
-               "Download Agreement"
+                "Download Agreement"
               )}
             </span>
           </div>
@@ -333,7 +333,7 @@ const Investment = () => {
 
         <div className="relative overflow-x-auto">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 bg-green-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 w-full text-nowrap whitespace-normal">
               <tr>
                 <th scope="col" className="px-6 py-3">
                   Month NO
@@ -362,13 +362,23 @@ const Investment = () => {
                 <th scope="col" className="px-6 py-3">
                   Payment Proof.
                 </th>
+                {investment?.referralDetails && (
+                  <th scope="col" className="px-6 py-3">
+                    Referral Payment type DR.
+                  </th>
+                )}
+                {investment?.referralDetails && (
+                  <th scope="col" className="px-6 py-3">
+                    Referral Payment Proof.
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
               {investment?.monthlyReturns?.map((month, index) => (
                 <tr
                   key={index}
-                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-nowrap whitespace-nowrap"
                 >
                   <td className="px-6 py-4 font-medium">{month?.monthNo}</td>
                   <td className="px-6 py-4 font-medium text-nowrap">
@@ -417,6 +427,17 @@ const Investment = () => {
                   <td className="px-6 py-4 font-medium">
                     {month?.paymentProof || "-"}
                   </td>
+
+                  {investment?.referralDetails && (
+                    <td className="px-6 py-4 font-medium">
+                      {month?.referrad?.paymentType || "-"}
+                    </td>
+                  )}
+                  {investment?.referralDetails && (
+                    <td className="px-6 py-4 font-medium">
+                      {month?.referrad?.paymentProof || "-"}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -431,6 +452,10 @@ const Investment = () => {
           repaymentData={repaymentData}
           setInvestment={setInvestment}
           investment={investment}
+          isRefferdUser={investment?.referralDetails ? true : false}
+          affiliateUserCommision={
+            investment?.referralDetails?.affiliateUserCommision
+          }
           refetch={refetch}
         />
       )}
@@ -467,7 +492,7 @@ const Investment = () => {
               <span className="sr-only">Close modal</span>
             </button>
             <div className="p-4 md:p-5 text-center">
-              <h3 className="text-2xl font-bold">Cash Flow Details</h3>
+              <h3 className="text-2xl font-bold">Depost & Bank Details</h3>
               <div className="my-3">
                 <h3 className=" w-full text-start text-lg font-medium">
                   Bank Ac Details:
@@ -505,6 +530,32 @@ const Investment = () => {
                   </span>
                 </h3>
               </div>
+
+              {investment?.referralDetails && (
+                <div className="my-3">
+                  <h3 className=" w-full text-start text-lg font-medium">
+                    Refferred Bank Details:
+                  </h3>
+                  <h3 className="mt-1 text-md text-start font-normal text-gray-800">
+                    Bank Name:{" "}
+                    <span className="font-medium">
+                      {investment?.referralDetails?.bankDetails?.bankName}
+                    </span>
+                    , Holder Name:{" "}
+                    <span className=" font-medium">
+                      {investment?.referralDetails?.bankDetails?.bankHolderName}
+                    </span>
+                    , Account Number:{" "}
+                    <span className=" font-medium">
+                      {investment?.referralDetails?.bankDetails?.bankAcNumber}
+                    </span>{" "}
+                    & IFSC Number:{" "}
+                    <span className=" font-medium">
+                      {investment?.referralDetails?.bankDetails?.bankIFSCCode}
+                    </span>
+                  </h3>
+                </div>
+              )}
               <button
                 onClick={() => setShowAlertModel((prev) => !prev)}
                 type="button"

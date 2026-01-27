@@ -213,8 +213,38 @@ export const getInvestmentDetails = asyncHandler(async (req, res) => {
     investment.monthlyReturns?.find((m) => m.status === "pending")
       ?.returnDate || null;
 
+  // get Refferred User Details
+  const investor = await userModel.findOne(
+    { userId: investment?.userId },
+    {
+      referredBy: 1,
+    },
+  );
+
+  let referralDetails = null;
+  if (investor && investor?.referredBy?.referralId) {
+    const affiliateUser = await userModel.findOne(
+      {
+        "affiliateIB.affiliateIBId": investor.referredBy.referralId,
+      },
+      {
+        affiliateIB: 1,
+        userId: 1,
+        name: 1,
+      },
+    );
+
+    referralDetails = {
+      affiliateUserId: affiliateUser.userId,
+      affiliateUserName: affiliateUser.name,
+      affiliateUserCommision: investor?.referredBy?.referralCommission,
+      bankDetails: affiliateUser.affiliateIB.bankDetails,
+    };
+  }
+
   // prepare response
   const formatted = {
+    userId: investment?.userId,
     investmentId: investment.investmentId,
     capital: investment.capital,
     planType: investment.plan?.planName || "N/A",
@@ -237,6 +267,7 @@ export const getInvestmentDetails = asyncHandler(async (req, res) => {
     bankIFSCCode: investment.bankIFSCCode,
     monthlyReturns: investment.monthlyReturns || [],
     agreementPath: investment.agreementPath,
+    referralDetails,
   };
 
   return res
@@ -253,7 +284,16 @@ export const getInvestmentDetails = asyncHandler(async (req, res) => {
 // Mark month paid
 export const markMonthPaid = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { monthNo, paymentType, paymentProof, roiUnknown, profit } = req.body;
+  const {
+    monthNo,
+    paymentType,
+    paymentProof,
+    roiUnknown,
+    profit,
+    commisionPaymentType,
+    commisionPaymentProof,
+    commision,
+  } = req.body;
 
   const query = mongoose.Types.ObjectId.isValid(id)
     ? { _id: id }
@@ -350,6 +390,15 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
     );
   }
 
+  // update referred payments details
+  if (commisionPaymentProof && commisionPaymentType) {
+    month.referrad = {
+      totalReturn: commision,
+      paymentType: commisionPaymentType,
+      paymentProof: commisionPaymentProof,
+    };
+  }
+
   await investment.save();
   const returnMonth = month?.returnDate?.toISOString()?.split("T")[0];
 
@@ -359,13 +408,43 @@ export const markMonthPaid = asyncHandler(async (req, res) => {
     userId: investment.userId,
     investment: investment._id,
     investmentId: investment.investmentId,
+    invCapital: investment.capital,
     paidMonthNo: month.monthNo,
     returnDate: month.returnDate,
     paidAMT: roiUnknown ? profit : month?.totalReturn,
     paidAt: new Date(),
     paymentType: paymentType,
     plan: investment.plan._id,
+    isCommiEntery: false
   });
+
+  if (commisionPaymentProof && commisionPaymentType) {
+
+    const affiliateUser = await userModel.findOne(
+      {
+        "affiliateIB.affiliateIBId": user?.referredBy?.referralId,
+      },
+      {
+        _id: 1,
+        userId: 1,
+      },
+    );
+
+    TransactionModel.create({
+      user: affiliateUser._id,
+      userId: affiliateUser.userId,
+      investment: investment._id,
+      investmentId: investment.investmentId,
+      invCapital: 0,
+      paidMonthNo: month.monthNo,
+      returnDate: month.returnDate,
+      paidAMT: commision,
+      paidAt: new Date(),
+      paymentType: commisionPaymentType,
+      plan: investment.plan._id,
+      isCommiEntery: true
+    });
+  }
 
   await sendSMS(
     `+91${user?.phone}`,
@@ -392,7 +471,7 @@ export const getInvestorInvestments = asyncHandler(async (req, res) => {
   if (!investments || investments.length === 0) {
     return res
       .status(200)
-      .json(new ApiResponse(200, {}, "No investments found for this investor"));
+      .json(new ApiResponse(200, [], "No investments found for this investor"));
   }
 
   // Format response
@@ -466,7 +545,7 @@ export const uploadInvAgreement = asyncHandler(async (req, res) => {
   // 2️⃣ Check investment exists FIRST
   const investment = await investmentModel.findOne({ investmentId });
   if (!investment) {
-throw new ApiError(400, "Something went wrong!");
+    throw new ApiError(400, "Something went wrong!");
   }
 
   // 3️⃣ Upload to Cloudinary
@@ -478,12 +557,13 @@ throw new ApiError(400, "Something went wrong!");
   await investment.save();
 
   // 5️⃣ Response
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      { agreementURL },
-      "Agreement uploaded successfully!"
-    )
-  );
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { agreementURL },
+        "Agreement uploaded successfully!",
+      ),
+    );
 });
-
