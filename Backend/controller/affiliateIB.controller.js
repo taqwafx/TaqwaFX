@@ -2,7 +2,7 @@ import { investmentModel } from "../models/investment.model.js";
 import { userModel } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { asyncHandler } from "../utils/AsyncHandler.js";
 
 export const verifyInvestorForAffiliateIB = asyncHandler(async (req, res) => {
   const { investorId } = req.body;
