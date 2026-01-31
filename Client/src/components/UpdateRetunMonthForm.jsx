@@ -11,9 +11,12 @@ const UpdateRetunMonthForm = ({
   investment,
   isRefferdUser,
   affiliateUserCommision,
+  investmentBankDetails,
+  referralBankDetails,
   refetch,
 }) => {
   const markMonth = useMarkMonthAsPaid();
+  console.log(investmentBankDetails, referralBankDetails);
 
   const [formData, setFormData] = useState({
     monthNo: 0,
@@ -22,7 +25,7 @@ const UpdateRetunMonthForm = ({
     commisionPaymentType: "",
     commisionPaymentProof: "",
     roiUnknown: false,
-    commision: 0
+    commision: 0,
   });
 
   const handleChange = (e) => {
@@ -141,7 +144,55 @@ const UpdateRetunMonthForm = ({
             {/* <!-- Modal body --> */}
 
             <form onSubmit={handleSubmit} className="p-4 md:p-5">
-              <div className="flex flex-col mb-3">
+              <div>
+                <h3 className=" w-full text-start text-lg font-medium">
+                  Investore Bank Details:
+                </h3>
+                <h3 className="mt-1 text-md text-start font-normal text-gray-800">
+                  Bank Name:{" "}
+                  <span className="font-medium">{investment?.bankName}</span>,
+                  Holder Name:{" "}
+                  <span className=" font-medium">
+                    {investment?.bankHolderName}
+                  </span>
+                  , Account Number:{" "}
+                  <span className=" font-medium">
+                    {investment?.bankAcNumber}
+                  </span>{" "}
+                  & IFSC Number:{" "}
+                  <span className=" font-medium">
+                    {investment?.bankIFSCCode}
+                  </span>
+                </h3>
+              </div>
+
+              {isRefferdUser && (
+                <div className="my-3">
+                  <h3 className=" w-full text-start text-lg font-medium">
+                    Refferred Bank Details:
+                  </h3>
+                  <h3 className="mt-1 text-md text-start font-normal text-gray-800">
+                    Bank Name:{" "}
+                    <span className="font-medium">
+                      {investment?.referralDetails?.bankDetails?.bankName}
+                    </span>
+                    , Holder Name:{" "}
+                    <span className=" font-medium">
+                      {investment?.referralDetails?.bankDetails?.bankHolderName}
+                    </span>
+                    , Account Number:{" "}
+                    <span className=" font-medium">
+                      {investment?.referralDetails?.bankDetails?.bankAcNumber}
+                    </span>{" "}
+                    & IFSC Number:{" "}
+                    <span className=" font-medium">
+                      {investment?.referralDetails?.bankDetails?.bankIFSCCode}
+                    </span>
+                  </h3>
+                </div>
+              )}
+
+              <div className="flex flex-col my-3">
                 <span>
                   Month No:{" "}
                   <span className=" font-medium">{repaymentData?.monthNo}</span>
@@ -156,9 +207,7 @@ const UpdateRetunMonthForm = ({
                   <span>
                     Commision Return:{" "}
                     <span className=" font-medium">
-                      {formatRupee(
-                        formData.commision,
-                      )}
+                      {formatRupee(formData.commision)}
                     </span>
                   </span>
                 )}
@@ -169,6 +218,7 @@ const UpdateRetunMonthForm = ({
                   </span>
                 </span>
               </div>
+
               <div className="mb-4">
                 <div className="col-span-2 sm:col-span-1 mb-4">
                   <label
