@@ -7,7 +7,6 @@ import {
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader.jsx";
 import {
-  addMonthsSafe,
   formatDateToIST,
   formatRupee,
 } from "../../utils/helper.js";
@@ -503,8 +502,7 @@ const Investor = () => {
                   <td className="px-6 py-4 font-medium">{inv?.planType}</td>
                   <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
                   <td className="px-6 py-4 font-medium">
-                    {/* {addMonthsSafe(inv?.startDate, 1)?.toISOString()?.split("T")[0] || '-'} */}
-                    {formatDateToIST(addMonthsSafe(inv?.startDate, 1)) || "-"}
+                    {formatDateToIST(inv?.startDate) || "-"}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {formatDateToIST(inv?.endDate) || "-"}

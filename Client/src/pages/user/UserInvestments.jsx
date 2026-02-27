@@ -4,7 +4,6 @@ import { useGetInvestoInvestments } from "../../hooks/appHook.js";
 import Loader from "../../components/Loader.jsx";
 import toast from "react-hot-toast";
 import {
-  addMonthsSafe,
   formatDateToIST,
   formatRupee,
 } from "../../utils/helper.js";
@@ -115,10 +114,7 @@ const UserInvestments = () => {
                     <td className="px-6 py-4 font-medium">{inv?.planType}</td>
                     <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
                     <td className="px-6 py-4 font-medium text-nowrap">
-                      {/* {addMonthsSafe(inv?.startFrom, 1)
-                      ?.toISOString()
-                      ?.split("T")[0] || "-"} */}
-                      {formatDateToIST(addMonthsSafe(inv?.startFrom, 1)) || "-"}
+                      {formatDateToIST(inv?.startFrom) || "-"}
                     </td>
                     <td className="px-6 py-4 font-medium text-nowrap">
                       {formatDateToIST(inv?.endFrom) || "-"}
