@@ -354,6 +354,7 @@ export const getInvestorDetails = asyncHandler(async (req, res) => {
 
   // 3️⃣ Initialize stats
   let totalCapitalInvested = 0;
+  let completedInvCapital = 0;
   let totalPaidTillDate = 0;
   let hasActiveInvestment = false;
   let runningInvestments = 0;
@@ -361,12 +362,14 @@ export const getInvestorDetails = asyncHandler(async (req, res) => {
 
   // 🧮 investment data array
   const investmentData = investments.map((inv) => {
-    totalCapitalInvested += inv.capital || 0;
     totalPaidTillDate += inv.TotalPaidTillDate || 0;
 
     if (inv.status === "Active") {
       hasActiveInvestment = true;
       runningInvestments++;
+      totalCapitalInvested += inv.capital || 0;
+    } else if (inv.status === "Complete") {
+      completedInvCapital += inv.capital || 0;
     }
 
     // find next repayment date
@@ -407,8 +410,10 @@ export const getInvestorDetails = asyncHandler(async (req, res) => {
   const investedByPlanMap = {};
   investments.forEach((inv) => {
     const planName = inv.plan?.planName || "Unknown Plan";
-    investedByPlanMap[planName] =
-      (investedByPlanMap[planName] || 0) + (inv.capital || 0);
+    if (inv.status === "Active") {
+      investedByPlanMap[planName] =
+        (investedByPlanMap[planName] || 0) + (inv.capital || 0);
+    }
   });
 
   // Ensure all plans exist, even with 0 funds
@@ -455,7 +460,7 @@ export const getInvestorDetails = asyncHandler(async (req, res) => {
       referralUserId: affiliateUser.userId,
       referralUserName: affiliateUser.name,
       referralCommission: investor.referredBy.referralCommission,
-    }
+    };
   }
   // 6️⃣ Prepare final response
   const result = {
@@ -472,6 +477,7 @@ export const getInvestorDetails = asyncHandler(async (req, res) => {
       password: investor.password, // ⚠️ in production, don’t send password
     },
     totalCapitalInvested,
+    completedInvCapital,
     investedByPlan,
     totalPaidTillDate,
     hasActiveInvestment,

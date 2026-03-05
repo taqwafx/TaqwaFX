@@ -15,9 +15,31 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
 
   // 3️⃣ Total fund invested
   const totalFundData = await investmentModel.aggregate([
-    { $group: { _id: null, total: { $sum: "$capital" } } },
+    {
+      $match: { status: "Active" }, // filter active investments
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: "$capital" },
+      },
+    },
   ]);
   const totalFund = totalFundData[0]?.total || 0;
+
+  // complete investment fund
+  const completeInvFundData = await investmentModel.aggregate([
+    {
+      $match: { status: "Complete" }, // filter active investments
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: "$capital" },
+      },
+    },
+  ]);
+  const completeInvFund = completeInvFundData[0]?.total || 0;
 
   // 4️⃣ This month’s new investors
   const now = new Date();
@@ -34,10 +56,12 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
   for (const plan of plans) {
     const investments = await investmentModel.find({ plan: plan._id });
     const investorIds = new Set(investments.map((inv) => inv.user?.toString()));
-    const totalPlanFund = investments.reduce(
-      (sum, inv) => sum + (inv.capital || 0),
-      0
-    );
+    const totalPlanFund = investments.reduce((sum, inv) => {
+      if (inv.status === "Active") {
+        return sum + (inv.capital || 0);
+      }
+      return sum;
+    }, 0);
 
     planWiseData.push({
       planName: plan.planName,
@@ -149,12 +173,12 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
       },
     },
 
-    { $sort: { repaymentDate: 1 } },
+    { $sort: { investorId: 1 } },
   ]);
 
   // 8️⃣ get overdue repayments count
   const overdueCount = upcomingRepayments.filter(
-    (item) => item.isOverdue === true
+    (item) => item.isOverdue === true,
   ).length;
 
   // 9️⃣ Final dashboard response
@@ -163,18 +187,19 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
       totalInvestors,
       totalInvestments,
       totalFund,
+      completeInvFund,
       thisMonthNewInvestors,
     },
     planWiseData,
     topInvestors,
     upcomingRepayments,
-    overdueCount
+    overdueCount,
   };
 
   return res
     .status(200)
     .json(
-      new ApiResponse(200, result, "Admin dashboard data fetched successfully")
+      new ApiResponse(200, result, "Admin dashboard data fetched successfully"),
     );
 });
 
@@ -219,6 +244,7 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
         status: "Inactive",
       },
       totalInvestmentCapital: 0,
+      completedInvCapital: 0,
       totalPaidTillDate: 0,
       investedByPlan,
       clearMonths: [],
@@ -232,18 +258,26 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
 
   // Otherwise, calculate all values
   let totalInvestmentCapital = 0;
+  let completedInvCapital = 0;
   let totalPaidTillDate = 0;
   let investedByPlan = {};
   let clearMonths = [];
   let comingPayments = [];
 
   for (const inv of investments) {
-    totalInvestmentCapital += inv.capital || 0;
     totalPaidTillDate += inv.TotalPaidTillDate || 0;
 
+    if (inv.status === "Active") {
+      totalInvestmentCapital += inv.capital || 0;
+    } else if (inv.status === "Complete") {
+      completedInvCapital += inv.capital || 0;
+    }
+
     const planName = inv.plan?.planName || "Unknown Plan";
-    investedByPlan[planName] =
-      (investedByPlan[planName] || 0) + (inv.capital || 0);
+    if (inv.status === "Active") {
+      investedByPlan[planName] =
+        (investedByPlan[planName] || 0) + (inv.capital || 0);
+    }
 
     if (inv.monthlyReturns && inv.monthlyReturns.length > 0) {
       for (const month of inv.monthlyReturns) {
@@ -280,11 +314,11 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
   clearMonths.reverse();
   // let firstFiveClearMonths = clearMonths.slice(0, 5); last 5 returns
   comingPayments.sort(
-    (a, b) => new Date(a.returnDate) - new Date(b.returnDate)
+    (a, b) => new Date(a.returnDate) - new Date(b.returnDate),
   );
 
   const hasActiveInvestment = investments.some(
-    (inv) => inv.status === "Active"
+    (inv) => inv.status === "Active",
   );
 
   const dashboardData = {
@@ -300,6 +334,7 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
       status: hasActiveInvestment ? "Active" : "Inactive",
     },
     totalInvestmentCapital,
+    completedInvCapital,
     totalPaidTillDate,
     investedByPlan: investedByPlanArray,
     clearMonths: clearMonths,
@@ -312,7 +347,7 @@ export const getInvestorDashboard = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         dashboardData,
-        "Investor dashboard fetched successfully"
-      )
+        "Investor dashboard fetched successfully",
+      ),
     );
 });

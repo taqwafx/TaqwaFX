@@ -6,10 +6,7 @@ import {
 } from "../../hooks/appHook.js";
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader.jsx";
-import {
-  formatDateToIST,
-  formatRupee,
-} from "../../utils/helper.js";
+import { formatDateToIST, formatRupee } from "../../utils/helper.js";
 import CreateInvestment from "../../components/CreateInvestment.jsx";
 import { strongPasswordRegex } from "../../utils/validations.js";
 
@@ -431,6 +428,37 @@ const Investor = () => {
             {/* Value */}
             <h3 className="text-whie text-3xl font-bold">
               {formatRupee(investor?.totalPaidTillDate)}
+            </h3>
+          </div>
+
+          <div className="bg-white rounded-lg p-6 border border-slate-200 shadow transition-colors">
+            {/* Icon */}
+            <div className="mb-2">
+              <svg
+                className="w-8 h-8 text-slate-400"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 17.345a4.76 4.76 0 0 0 2.558 1.618c2.274.589 4.512-.446 4.999-2.31.487-1.866-1.273-3.9-3.546-4.49-2.273-.59-4.034-2.623-3.547-4.488.486-1.865 2.724-2.899 4.998-2.31.982.236 1.87.793 2.538 1.592m-3.879 12.171V21m0-18v2.2"
+                />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <p className="text-slat text-sm mb-2">Completed Investment</p>
+
+            {/* Value */}
+            <h3 className="text-whie text-3xl font-bold">
+              {formatRupee(investor?.completedInvCapital)}
             </h3>
           </div>
         </div>
