@@ -39,7 +39,7 @@ import planRouter from "./routes/plan.routes.js";
 import investmentRouter from "./routes/investment.routes.js";
 import transactionsRouter from "./routes/transactions.routes.js";
 import affiliateIBRouter from "./routes/affiliateIB.routes.js";
-import Auth2FARouter from "./routes/Auth2FA.routes.js";
+import Auth2FARouter from "./routes/auth2FA.routes.js";
 
 // API routes
 app.use("/api/v1/user", userRouter);
