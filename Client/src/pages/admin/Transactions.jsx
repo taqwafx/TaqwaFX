@@ -6,6 +6,7 @@ import { formatDateToIST, formatRupee } from "../../utils/helper";
 const Transactions = () => {
   const loadMoreRef = useRef(null);
   const [filters, setFilters] = useState({});
+  const [totalFund, setTotalFund] = useState(0);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useGetTransactions(filters);
@@ -40,6 +41,14 @@ const Transactions = () => {
 
     return () => observer.disconnect();
   }, [hasNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    const totalCapital = transactions?.reduce(
+      (sum, tran) => sum + (tran.invCapital || 0),
+      0,
+    );
+    setTotalFund(totalCapital);
+  }, [transactions]);
 
   return (
     <main>
@@ -138,7 +147,9 @@ const Transactions = () => {
                     {tran?.investmentId}
                   </td>
                   <td className="px-6 py-4 font-medium">
-                    {tran?.invCapital === 0 ? "Commision" : formatRupee(tran?.invCapital) }
+                    {tran?.invCapital === 0
+                      ? "Commision"
+                      : formatRupee(tran?.invCapital)}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {tran?.plan?.planName}
@@ -181,6 +192,15 @@ const Transactions = () => {
           <span className=" text-blue-700">{formatRupee(paidAMTSum)}</span>
         </span>
       </div>
+
+      {filters?.fromDate || filters?.toDate && (
+        <div className=" fixed bottom-[85px] right-10 bg-white rounded-lg shadow py-2 px-3 border">
+          <span className=" font-medium m-1">
+            Total Capital :-{" "}
+            <span className=" text-blue-700">{formatRupee(totalFund)}</span>
+          </span>
+        </div>
+      )}
 
       <div ref={loadMoreRef} />
     </main>

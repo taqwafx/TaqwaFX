@@ -38,6 +38,17 @@ const userSchema = new mongoose.Schema({
     referralId: { type: String }, // AIB-TFX4001
     referralCommission: { type: Number }, // 1 / 1.5 / 2
   },
+  twoFactorEnabled: {
+    type: Boolean,
+    default: false,
+  },
+
+  twoFactorSecret: {
+    type: String,
+  },
+  twoFactorTempSecret: {
+    type: String,
+  },
 
   createdAt: { type: Date, default: Date.now },
 });

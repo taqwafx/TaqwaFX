@@ -32,6 +32,9 @@ import AffiliateIB from "../pages/admin/AffiliateIB.jsx";
 import UserAffiliateIB from "../pages/user/UserAffiliateIB.jsx";
 import UserAffiliateIBInvestments from "../pages/user/UserAffiliateIBInvestments.jsx";
 import AffiliateIBDetails from "../pages/admin/AffiliateIBDetails.jsx";
+import Settings from "../pages/admin/Settings.jsx";
+import Auth2FASetup from "../pages/Auth2FASetup.jsx";
+import Auth2FACheck from "../pages/Auth2FACheck.jsx";
 
 const AppRoutes = () => {
   return (
@@ -41,6 +44,8 @@ const AppRoutes = () => {
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth/login/" element={<Login />} />
+        <Route path="/auth/2fa-setup/" element={<Auth2FASetup />} />
+        <Route path="/auth/2fa-check/" element={<Auth2FACheck />} />
 
         <Route element={<AppLayout />}>
           {/* Admin Routes */}
@@ -53,6 +58,7 @@ const AppRoutes = () => {
               element={<Investment />}
             />
             <Route path="/admin/plans" element={<Plans />} />
+            <Route path="/admin/settings" element={<Settings />} />
             <Route path="/admin/transactions" element={<Transactions />} />
             <Route path="/admin/affiliateIB" element={<AffiliateIB />} />
             <Route
@@ -70,7 +76,7 @@ const AppRoutes = () => {
               element={<UserInvestment />}
             />
             <Route path="/user/plans" element={<UserPlans />} />
-
+            <Route path="/user/settings" element={<Settings />} />
             <Route path="/user/affiliateIB" element={<UserAffiliateIB />} />
             <Route
               path="/user/affiliateIB/referral/:investorId"

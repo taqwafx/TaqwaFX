@@ -167,3 +167,24 @@ export const getReferralUserInvestments = async (investorId) => {
   return res.data;
 };
 
+// 2FA Api's
+export const setup2FA = async () => {
+  const res = await api.get("/auth/2FA/setup");
+  return res.data;
+};
+
+export const verify2FASetup = async (formData) => {
+  const res = await api.post("/auth/2FA/verify-setup", formData);
+  return res.data;
+};
+
+export const disable2FA = async (formData) => {
+  const res = await api.post("/auth/2FA/disable", formData);
+  return res.data;
+};
+
+export const verifyLogin2FA = async (formData) => {
+  const res = await api.post("/auth/2FA/verify-login", formData);
+  return res.data;
+};
+

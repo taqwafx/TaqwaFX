@@ -39,6 +39,7 @@ import planRouter from "./routes/plan.routes.js";
 import investmentRouter from "./routes/investment.routes.js";
 import transactionsRouter from "./routes/transactions.routes.js";
 import affiliateIBRouter from "./routes/affiliateIB.routes.js";
+import Auth2FARouter from "./routes/Auth2FA.routes.js";
 
 // API routes
 app.use("/api/v1/user", userRouter);
@@ -46,6 +47,7 @@ app.use("/api/v1/plan", planRouter);
 app.use("/api/v1/investment", investmentRouter);
 app.use("/api/v1/transactions", transactionsRouter);
 app.use("/api/v1/affiliateIB", affiliateIBRouter);
+app.use("/api/v1/auth/2FA", Auth2FARouter);
 
 // ---- Serve React (Vite build) ----
 const clientDistPath = path.join(__dirname, "../Client/dist");

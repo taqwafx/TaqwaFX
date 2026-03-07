@@ -9,6 +9,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [adminDashboard, setAdminDashboard] = useState({});
   const [totalPaying, setTotalPaying] = useState(0);
+  const [totalFund, setTotalFund] = useState(0);
   const { data, isSuccess, isLoading, refetch, isError, error } =
     useGetAdminDashboard();
 
@@ -19,7 +20,12 @@ const AdminDashboard = () => {
       (sum, inv) => sum + (inv.monthlyProfit || 0),
       0,
     );
+    const totalCapital = data?.data?.upcomingRepayments?.reduce(
+      (sum, inv) => sum + (inv.capital || 0),
+      0,
+    );
     setTotalPaying(totalProfit);
+    setTotalFund(totalCapital);
   }, [isSuccess]);
 
   useEffect(() => {
@@ -338,6 +344,15 @@ const AdminDashboard = () => {
           <span className=" font-medium m-1">
             Total Paying :-{" "}
             <span className=" text-blue-700">{formatRupee(totalPaying)}</span>
+          </span>
+        </div>
+      </div>
+
+        <div className="flex items-end justify-end mt-3">
+        <div className="max-w-max bg-white rounded-lg shadow py-2 px-3 border">
+          <span className=" font-medium m-1">
+            Total Capital :-{" "}
+            <span className=" text-blue-700">{formatRupee(totalFund)}</span>
           </span>
         </div>
       </div>

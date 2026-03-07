@@ -25,6 +25,23 @@ const Login = () => {
   };
 
   useEffect(() => {
+    if (login.isSuccess) {
+      const loginData = login?.data?.data;
+      if (loginData?.requires2FA) {
+        navigate("/auth/2fa-check/", {
+          state: {
+            mode: "login",
+            tempToken: loginData?.tempToken,
+          },
+        });
+      } else {
+        setUser(loginData?.user);
+        toast.success(login?.data?.message);
+      }
+    }
+  }, [login.isSuccess]);
+
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await getMe();
@@ -128,7 +145,7 @@ const Login = () => {
                 onClick={() =>
                   toast.error(
                     "Please Contact Admin to Recover Password.",
-                    "Info"
+                    "Info",
                   )
                 }
                 className="ms-auto text-sm text-blue-700 hover:underline cursor-pointer"
@@ -161,4 +178,4 @@ const Login = () => {
   );
 };
 
-export default Login
+export default Login;

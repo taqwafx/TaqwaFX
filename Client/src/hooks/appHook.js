@@ -11,6 +11,7 @@ import {
   createInvestor,
   createPlan,
   deletePlan,
+  disable2FA,
   getAdminAffiliateIBDashboard,
   getAdminDashboard,
   getAffiliateUserById,
@@ -26,23 +27,21 @@ import {
   loginUser,
   logOut,
   markMonthPaid,
+  setup2FA,
   updatePassword,
   uploadInvAgreement,
+  verify2FASetup,
   verifyAffiliateIB,
   verifyInvestorForAffiliateIB,
+  verifyLogin2FA,
 } from "../api/appApi.js";
 import { toast } from "react-hot-toast";
 import { useApp } from "../context/AppContext.jsx";
 import { useNavigate } from "react-router-dom";
 
 export const useLogin = () => {
-  const { setUser } = useApp();
   return useMutation({
     mutationFn: loginUser,
-    onSuccess: (data) => {
-      setUser(data.data.user);
-      toast.success(data?.message);
-    },
     onError: (error) => {
       console.log("AxiosError:", error); // 👈 keep this
       const msg =
@@ -339,5 +338,53 @@ export const useGetReferralUserInvestments = (investorId) => {
     queryFn: () => getReferralUserInvestments(investorId),
     enabled: !!investorId, // only fetch if id exists
     staleTime: 0,
+  });
+};
+
+// 2FA Hook's
+export const useSetup2FA = () => {
+  return useQuery({
+    queryKey: ["setup2FA"],
+    queryFn: () => setup2FA(),
+    staleTime: 0,
+  });
+};
+
+export const useVerify2FASetup = () => {
+  return useMutation({
+    mutationFn: verify2FASetup,
+    onError: (error) => {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      toast.error(msg);
+    },
+  });
+};
+
+export const useDisable2FA = () => {
+  return useMutation({
+    mutationFn: disable2FA,
+    onError: (error) => {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      toast.error(msg);
+    },
+  });
+};
+
+export const useVerifyLogin2FA = () => {
+  return useMutation({
+    mutationFn: verifyLogin2FA,
+    onError: (error) => {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      toast.error(msg);
+    },
   });
 };
