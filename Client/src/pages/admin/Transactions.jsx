@@ -193,7 +193,7 @@ const Transactions = () => {
         </span>
       </div>
 
-      {filters?.fromDate || filters?.toDate && (
+      {(filters?.fromDate || filters?.toDate) && (
         <div className=" fixed bottom-[85px] right-10 bg-white rounded-lg shadow py-2 px-3 border">
           <span className=" font-medium m-1">
             Total Capital :-{" "}
