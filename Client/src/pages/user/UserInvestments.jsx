@@ -4,6 +4,7 @@ import { useGetInvestoInvestments } from "../../hooks/appHook.js";
 import Loader from "../../components/Loader.jsx";
 import toast from "react-hot-toast";
 import {
+  addMonthsSafe,
   formatDateToIST,
   formatRupee,
 } from "../../utils/helper.js";
@@ -98,46 +99,44 @@ const UserInvestments = () => {
             </thead>
             <tbody>
               {investments?.map((inv, index) => (
-                  <tr
-                    key={index}
-                    onClick={() =>
-                      navigate(`/user/investments/${inv?.investmentId}`)
-                    }
-                    className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-nowrap whitespace-nowrap"
-                  >
-                    <td className="px-6 py-4 font-medium">
-                      {inv?.investmentId}
-                    </td>
-                    <td className="px-6 py-4 font-medium">
-                      {formatRupee(inv?.capital)}
-                    </td>
-                    <td className="px-6 py-4 font-medium">{inv?.planType}</td>
-                    <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
-                    <td className="px-6 py-4 font-medium text-nowrap">
-                      {formatDateToIST(inv?.startFrom) || "-"}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-nowrap">
-                      {formatDateToIST(inv?.endFrom) || "-"}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-nowrap">
-                      {formatDateToIST(inv?.repaymentOn) || "-"}
-                    </td>
-                    <td className="px-6 py-4 font-medium">
-                      {inv?.completedMonths}
-                    </td>
-                    <td className="px-6 py-4 font-medium">
-                      <span
-                        className={`${
-                          inv?.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        } text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm`}
-                      >
-                        {inv?.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                <tr
+                  key={index}
+                  onClick={() =>
+                    navigate(`/user/investments/${inv?.investmentId}`)
+                  }
+                  className="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-nowrap whitespace-nowrap"
+                >
+                  <td className="px-6 py-4 font-medium">{inv?.investmentId}</td>
+                  <td className="px-6 py-4 font-medium">
+                    {formatRupee(inv?.capital)}
+                  </td>
+                  <td className="px-6 py-4 font-medium">{inv?.planType}</td>
+                  <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
+                  <td className="px-6 py-4 font-medium text-nowrap">
+                    {formatDateToIST(addMonthsSafe(inv?.startFrom, 1)) || "-"}
+                  </td>
+                  <td className="px-6 py-4 font-medium text-nowrap">
+                    {formatDateToIST(inv?.endFrom) || "-"}
+                  </td>
+                  <td className="px-6 py-4 font-medium text-nowrap">
+                    {formatDateToIST(inv?.repaymentOn) || "-"}
+                  </td>
+                  <td className="px-6 py-4 font-medium">
+                    {inv?.completedMonths}
+                  </td>
+                  <td className="px-6 py-4 font-medium">
+                    <span
+                      className={`${
+                        inv?.status === "Active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      } text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm`}
+                    >
+                      {inv?.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

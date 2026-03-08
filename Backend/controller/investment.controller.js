@@ -152,7 +152,6 @@ export const createInvestment = asyncHandler(async (req, res) => {
 
   const agreementURL = await uploadFileToCloudinary(agreementFile, newFileName);
 
-  const fristReturnDate = addMonthsSafe(sDate, 1)
   const investment = await investmentModel.create({
     user: user[0]?._id,
     userId: userId,
@@ -161,7 +160,7 @@ export const createInvestment = asyncHandler(async (req, res) => {
     plan: planId,
     roi: roiUnknown ? plan?.returnROI : roi,
     roiUnknown,
-    startDate: fristReturnDate,
+    startDate: sDate,
     endDate,
     status: "Active",
     overallReturn,
@@ -179,7 +178,7 @@ export const createInvestment = asyncHandler(async (req, res) => {
     agreementPath: agreementURL,
   });
 
-  const startOn = fristReturnDate?.toISOString()?.split("T")[0];
+  const startOn = addMonthsSafe(sDate, 1)?.toISOString()?.split("T")[0];
 
   await sendSMS(
     `+91${user[0]?.phone}`,

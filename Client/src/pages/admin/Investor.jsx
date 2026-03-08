@@ -6,7 +6,11 @@ import {
 } from "../../hooks/appHook.js";
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader.jsx";
-import { formatDateToIST, formatRupee } from "../../utils/helper.js";
+import {
+  addMonthsSafe,
+  formatDateToIST,
+  formatRupee,
+} from "../../utils/helper.js";
 import CreateInvestment from "../../components/CreateInvestment.jsx";
 import { strongPasswordRegex } from "../../utils/validations.js";
 
@@ -530,7 +534,7 @@ const Investor = () => {
                   <td className="px-6 py-4 font-medium">{inv?.planType}</td>
                   <td className="px-6 py-4 font-medium">{inv?.roi}%</td>
                   <td className="px-6 py-4 font-medium">
-                    {formatDateToIST(inv?.startDate) || "-"}
+                    {formatDateToIST(addMonthsSafe(inv?.startDate, 1)) || "-"}
                   </td>
                   <td className="px-6 py-4 font-medium">
                     {formatDateToIST(inv?.endDate) || "-"}
