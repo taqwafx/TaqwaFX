@@ -173,7 +173,7 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
       },
     },
 
-    { $sort: { investorId: 1 } },
+    { $sort: { repaymentDate: 1 } },
   ]);
 
   // 8️⃣ get overdue repayments count
