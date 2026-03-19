@@ -23,8 +23,8 @@ export default defineConfig({
         short_name: 'TaqwaFX',
         description: 'TaqwaFX Investment Management Platform',
         
-        theme_color: '#000000',
-        background_color: '#000000',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
         
         display: 'standalone',   // 🔥 MUST
         scope: '/',              // 🔥 MUST
